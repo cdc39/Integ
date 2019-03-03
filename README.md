@@ -1,5 +1,8 @@
-# 简单又强大的新一代Java ORM框架：Integ
-Integ 是极其简单又功能完整的Java ORM框架，它的主要功能特点有：
+# 简单又强大的新一代Java持久层框架：Integ ORM
+
+每一个涉及数据库的Java应用系统都需要解决从数据库到对象的映射问题，又称为Object-Relation-Mapping问题，可简写为ORMapping或ORM。解决ORM问题的框架又被称为持久层框架。
+
+Integ 是极其简单又功能完整的Java持久层框架，它的主要功能特点有：
 
 * 支持增删改查询
 * 支持属性映射
