@@ -15,7 +15,7 @@ Integ 是极其简单又功能完整的Java持久层框架，它的主要功能�
 * 支持多种数据库，当前支持MySQL,Oracle,SQLServer,PostgreSQL
 
 Integ中最重要的一个思路，就是把ORM问题划分为两个层次：DAO层（数据访问层）和EAO层（实体对象访问层）。
-在这个指导思想下，Integ ORM框架仅用了约48K的代码，就实现了与Hibernate、MyBatis几乎一致的功能。
+在这个指导思想下，Integ ORM框架用了很少的代码，就实现了与Hibernate、MyBatis几乎一致的功能。
 
 Integ的使用方法也是非常简单。
 
@@ -51,7 +51,7 @@ public class Student extends Entity {
 	private Integer sex;
 	@ForeignKey(masterClass=SchoolClass.class)
 	private int schoolClassId;
-	private String className;
+	private String className;  // 映射属性
 	public Integer getSex() { return sex; }
 	public void setSex(Integer sex) { this.sex = sex; }
 	public int getSchoolClassId() { return schoolClassId; }
@@ -69,7 +69,7 @@ public class SchoolClass extends Entity {
 
 ```
 
-建立Service类，实现增加/修改/删除操作
+定义Service类，以及增加/修改/删除/查询 处理示范
 
 ```java
 
@@ -80,7 +80,7 @@ public class StudentService extends EntityAccessService<Student> {
 	}
 	@Override
 	public void setEntityConfig(EntityConfig config) {
-		config.addNameMapping("className", "schoolClassId");
+		config.addNameMapping("className", "schoolClassId");  // 关联映射属性配置，取值来自 SchoolClass.name
 	}
 	@Override
 	protected void fillExtendFields(Student stu) {	}
@@ -122,14 +122,48 @@ public class StudentService extends EntityAccessService<Student> {
 		// 分页查询
 		TabQuery tq = new TabQuery();
 		tq.addWhereItem("school_class_id=?", 1);
-		tq.setPageInfo(21, 10);
+		tq.setPageInfo(21, 10);  // 从第21行开始，查询10行
 		PageData page = eao.pageQuery(tq);		
 		
+	}
+	
+	// 事务样板
+	public void tran1() {
+		Student s = new Student();
+		s.setName("张三");
+		eao.insert(s);
+		s.setName("李四");
+		eao.update(s, "name");
+		throw new RuntimeException("模拟发生错误");
+	}	
+	
+	// 事务调用
+	public void testTran() {
+		executeTransaction("testTran");
 	}
 	
 }
 
 ```
 
+每一个Service类里面都会包含一个eao对象和一个dao对象，eao（EntityAccessObject类型）对象用于处理特定类型（比如Student）的实体对象，dao（DataAccessObject）对象用于数据库相关操作。eao以dao为基础，为Service层提供支持。
 
 
+
+## 总结
+
+ORM问题域的需求，是需要直接操作对象而不是操作数据库，需要增删改查功能，需要缓存，需要事务，需要广泛的适应性，灵活的扩展性，这些Integ都能提供。未来要适配几十种数据库，适配Redis，适配分库分表，要改起来都不算难事。因此 Integ 可以说是功能完备的ORM框架。
+
+同时Integ还做到了极简。目前Integ代码只有48K，发展到究极形态，估计也不会超过300K。
+
+Hibernate较EJB更轻量级
+MyBatis较Hibernate更轻量级
+Integ较MyBatis更轻量级
+
+轻量级不代表功能弱，比如MyBatis是没有提供分页查询功能的，有大牛写了个广受欢迎的MyBatis的分页查询的插件PageHelper，就用去了200K代码。然而在Integ里面不用插件，已经天然集成了分页查询功能。
+
+代码少说明结构简单，逻辑简单。面对简单的结构和逻辑，不论是学习，还是要修改扩展，都会更简单，更轻松，可以省下来很多宝贵的时间。
+
+如果你对Hibernate复杂的注解搞得头晕脑胀、战战兢兢，如果你对MyBatic动态条件查询的实现方式（在配置文件中而不是在java代码中）感到怪异，如果你厌烦了隔绝了底层代码，让逻辑陡然复杂起来的动态代理，那么来试试 Integ 吧，你会发现这里有更简洁、更优雅的解决方案。
+
+欢迎大家下载使用。并欢迎提出改进意见，帮助测试、修改，一起努力让Integ变得更好。谢谢！
