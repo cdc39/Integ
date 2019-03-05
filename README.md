@@ -22,7 +22,7 @@ Integ的使用方法也是非常简单。
 
 先建表
 
-```
+```sql
 CREATE TABLE `tb_student` (
   `student_id` varchar(20) NOT NULL,
   `student_name` varchar(100) NOT NULL,
