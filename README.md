@@ -1,6 +1,6 @@
 # 简单又强大的新一代Java持久层框架：Integ ORM
 
-##Integ ORM简介
+## Integ ORM简介
 
 每一个涉及数据库的Java应用系统都需要解决从关系数据库数据到Java对象的映射问题，又称为Object Relation Mapping问题，可简写为O/R Mapping或ORM。解决ORM问题的框架又被称为持久层框架。一个优良的持久层框架可以大大提高Java系统的开发效率和质量。
 
@@ -18,7 +18,7 @@ Integ ORM框架仅用了约48K的代码，就实现了与Hibernate、MyBatis几�
 
 Integ的使用方法也是非常简单。
 
-##Integ的使用方法
+## Integ的使用方法
 
 先建表
 
