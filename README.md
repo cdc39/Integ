@@ -45,7 +45,7 @@ CREATE TABLE `tb_school_class` (
 建实体类
 
 ```java
-@EntityAnno(classId="stud", table="tb_student", schema="")
+@EntityAnno(classId="stud", table="tb_student")
 public class Student extends Entity {
 	private Integer sex;
 	@ForeignKey(masterClass=SchoolClass.class)
@@ -68,5 +68,46 @@ public class SchoolClass extends Entity {
 
 ```
 
+建Service类
+
+```java
+public class StudentService extends EntityAccessService<Student> {
+	@Override
+	public DataAccessObject getDao() {
+		return DaoUtil.getDao();
+	}
+	@Override
+	public void setEntityConfig(EntityConfig config) {
+		config.addNameMapping("className", "schoolClassId");
+	}
+	@Override
+	protected void fillExtendFields(Student stu) {	}
+}
+
+public class SchoolClassService extends EntityAccessService<SchoolClass> {
+	@Override
+	public DataAccessObject getDao() {
+		return DaoUtil.getDao();
+	}
+	@Override
+	public void setEntityConfig(EntityConfig config) { }
+	@Override
+	protected void fillExtendFields(SchoolClass entity) { }
+}
+```
+
+增加
+
+```java
+	Student s1 = new Student();
+	s1.setId(id);
+	s1.setName("小明");
+	studentEao.insert(s1);
+
+```
+
+、修改、删除
+
+、修改、删除
 
 
