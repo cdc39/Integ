@@ -14,7 +14,8 @@ Integ 是极其简单又功能完整的Java持久层框架，它的主要功能�
 * 支持事务
 * 支持多种数据库，当前支持MySQL,Oracle,SQLServer,PostgreSQL
 
-Integ ORM框架仅用了约48K的代码，就实现了与Hibernate、MyBatis几乎一致的功能。
+Integ中最重要的一个思路，就是把ORM问题划分为两个层次：DAO层（数据访问层）和EAO层（实体对象访问层）。
+在这个指导思想下，Integ ORM框架仅用了约48K的代码，就实现了与Hibernate、MyBatis几乎一致的功能。
 
 Integ的使用方法也是非常简单。
 
@@ -42,7 +43,7 @@ CREATE TABLE `tb_school_class` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-建实体类
+定义实体类
 
 ```java
 @EntityAnno(classId="stud", table="tb_student")
@@ -68,9 +69,10 @@ public class SchoolClass extends Entity {
 
 ```
 
-建Service类
+建立Service类，实现增加/修改/删除操作
 
 ```java
+
 public class StudentService extends EntityAccessService<Student> {
 	@Override
 	public DataAccessObject getDao() {
@@ -82,32 +84,34 @@ public class StudentService extends EntityAccessService<Student> {
 	}
 	@Override
 	protected void fillExtendFields(Student stu) {	}
+	
+	public void add() {
+		Student st = new Student();
+		st.setId("s1");
+		st.setName("小明");
+		st.setSchoolClassId(1);
+		eao.insert(st);
+	}
+
+	public void update() {
+		Student st = eao.getById("s1");
+		st.setName("小华");
+		eao.update(st, "name");
+	}
+	
+	public void delete() {
+		eao.deleteById("s1");
+	}
+	
 }
 
-public class SchoolClassService extends EntityAccessService<SchoolClass> {
-	@Override
-	public DataAccessObject getDao() {
-		return DaoUtil.getDao();
-	}
-	@Override
-	public void setEntityConfig(EntityConfig config) { }
-	@Override
-	protected void fillExtendFields(SchoolClass entity) { }
-}
 ```
 
 增加
 
 ```java
-	Student s1 = new Student();
-	s1.setId(id);
-	s1.setName("小明");
-	studentEao.insert(s1);
+
 
 ```
-
-、修改、删除
-
-、修改、删除
 
 
