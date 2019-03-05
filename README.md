@@ -45,68 +45,25 @@ CREATE TABLE `tb_school_class` (
 建实体类
 
 ```java
-package orm.integ.test.entity;
-
-import java.util.Date;
-
-import orm.integ.eao.model.Entity;
-import orm.integ.eao.model.EntityAnno;
-import orm.integ.eao.model.ForeignKey;
-
 @EntityAnno(classId="stud", table="tb_student", schema="")
 public class Student extends Entity {
-
 	private Integer sex;
-	
-	private Date birthday;
-	
 	@ForeignKey(masterClass=SchoolClass.class)
 	private int schoolClassId;
-	
 	private String className;
-	
-	private int age;
+	public Integer getSex() { return sex; }
+	public void setSex(Integer sex) { this.sex = sex; }
+	public int getSchoolClassId() { return schoolClassId; }
+	public void setSchoolClassId(int schoolClassId) { this.schoolClassId = schoolClassId; }
+	public String getClassName() { return className; }
+	public void setClassName(String className) { this.className = className; }
+}
 
-	public Integer getSex() {
-		return sex;
-	}
-
-	public void setSex(Integer sex) {
-		this.sex = sex;
-	}
-
-	public Date getBirthday() {
-		return birthday;
-	}
-
-	public void setBirthday(Date birthday) {
-		this.birthday = birthday;
-	}
-
-	public int getSchoolClassId() {
-		return schoolClassId;
-	}
-
-	public void setSchoolClassId(int schoolClassId) {
-		this.schoolClassId = schoolClassId;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	public int getAge() {
-		return age;
-	}
-
-	public void setAge(int age) {
-		this.age = age;
-	}
-
+@EntityAnno(classId="scls", table="tb_school_class")
+public class SchoolClass extends Entity {
+	private int grade;  // 年级
+	public int getGrade() { return grade; }
+	public void setGrade(int grade) { this.grade = grade; }
 }
 
 ```
