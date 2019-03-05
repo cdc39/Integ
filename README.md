@@ -32,8 +32,84 @@ CREATE TABLE `tb_student` (
   `create_time` datetime NOT NULL,
   PRIMARY KEY  (`student_id`)
 ) DEFAULT CHARSET=utf8;
+
+CREATE TABLE `tb_school_class` (
+  `school_class_id` smallint(4) NOT NULL,
+  `school_class_name` varchar(100) NOT NULL,
+  `grade` tinyint(2) NOT NULL,
+  `create_time` datetime default NULL,
+  PRIMARY KEY  (`school_class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
+建实体类
+
+```java
+package orm.integ.test.entity;
+
+import java.util.Date;
+
+import orm.integ.eao.model.Entity;
+import orm.integ.eao.model.EntityAnno;
+import orm.integ.eao.model.ForeignKey;
+
+@EntityAnno(classId="stud", table="tb_student", schema="")
+public class Student extends Entity {
+
+	private Integer sex;
+	
+	private Date birthday;
+	
+	@ForeignKey(masterClass=SchoolClass.class)
+	private int schoolClassId;
+	
+	private String className;
+	
+	private int age;
+
+	public Integer getSex() {
+		return sex;
+	}
+
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
+
+	public Date getBirthday() {
+		return birthday;
+	}
+
+	public void setBirthday(Date birthday) {
+		this.birthday = birthday;
+	}
+
+	public int getSchoolClassId() {
+		return schoolClassId;
+	}
+
+	public void setSchoolClassId(int schoolClassId) {
+		this.schoolClassId = schoolClassId;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+}
+
+```
 
 
 
