@@ -139,7 +139,7 @@ public class StudentService extends EntityAccessService<Student> {
 	
 	// 事务调用
 	public void testTran() {
-		executeTransaction("testTran");
+		executeTransaction("tran1");
 	}
 	
 }
@@ -166,4 +166,4 @@ Integ较MyBatis更轻量级
 
 如果你对Hibernate复杂的注解搞得头晕脑胀、战战兢兢，如果你对MyBatic动态条件查询的实现方式（在配置文件中而不是在java代码中）感到怪异，如果你厌烦了隔绝了底层代码，让逻辑陡然复杂起来的动态代理，那么来试试 Integ 吧，你会发现这里有更简洁、更优雅的解决方案。
 
-欢迎大家下载使用。并欢迎提出改进意见，帮助测试、修改，一起努力让Integ变得更好。谢谢！
+欢迎大家下载使用。并欢迎提出改进意见，帮助测试、修改，一起努力让Integ完善起来。 谢谢！
