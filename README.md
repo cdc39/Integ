@@ -150,7 +150,7 @@ public class StudentService extends EntityAccessService<Student> {
 
 
 
-## 总结
+## 结语
 
 ORM问题域的需求，是需要直接操作对象而不是操作数据库，需要增删改查功能，需要缓存，需要事务，需要广泛的适应性，灵活的扩展性，这些Integ都能提供。未来要适配几十种数据库，适配Redis，适配分库分表，要改起来都不算难事。因此 Integ 可以说是功能完备的ORM框架。
 
