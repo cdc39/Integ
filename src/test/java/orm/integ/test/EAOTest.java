@@ -23,25 +23,31 @@ import orm.integ.utils.Convertor;
 
 public class EAOTest {
 	
+	static StudentService studentService;
+	static SchoolClassService classService;
 	static EntityAccessObject<Student> studentEao;
-	static EntityAccessObject<SchoolClass> classEao;
 	
 	@BeforeClass
 	public static void beforeAll() {
 		Log4jHelper.initLogger();
-		studentEao = new EntityAccessObject<Student>(new StudentService());
-		classEao = new EntityAccessObject<SchoolClass>(new SchoolClassService());
-		classEao.deleteAll();
+		studentService = new StudentService();
+		classService = new SchoolClassService();
+		
+		studentEao = studentService.getEao();
+		
+		classService.getEao().deleteAll();
+		
 		SchoolClass sc = new SchoolClass();
 		sc.setId(1);
 		sc.setName("1班");
 		sc.setGrade(1);
-		classEao.insert(sc);
+		classService.getEao().insert(sc);
+		
 	}
 	
 	@Before
 	public void before() {
-		studentEao.deleteAll();
+		studentService.getEao().deleteAll();
 	}
 	
 	@Test
@@ -55,7 +61,7 @@ public class EAOTest {
 		studentEao.insert(s1);
 		
 		s1 = studentEao.getById("s1");
-		String[] fields = new String[]{"id","name","className","className2","age"};
+		String[] fields = new String[]{"id","name","className","age"};
 		Record rec = studentEao.toRecord(s1, fields);
 		String className = rec.get("className");
 		String age = rec.get("age");

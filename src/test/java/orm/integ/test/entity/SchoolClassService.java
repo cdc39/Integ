@@ -18,7 +18,6 @@ public class SchoolClassService extends EntityAccessService<SchoolClass> {
 
 	@Override
 	protected void fillExtendFields(SchoolClass entity) {
-		
 	}
 	
 }

@@ -6,7 +6,7 @@ import orm.integ.eao.model.Entity;
 import orm.integ.eao.model.EntityAnno;
 import orm.integ.eao.model.ForeignKey;
 
-@EntityAnno(classId=Entities.STUDENT, table="tb_student", schema="")
+@EntityAnno(classId="stud", table="tb_student", schema="")
 public class Student extends Entity {
 
 	private Integer sex;
@@ -17,8 +17,6 @@ public class Student extends Entity {
 	private int schoolClassId;
 	
 	private String className;
-	
-	private Date createTime;
 	
 	private int age;
 
@@ -52,14 +50,6 @@ public class Student extends Entity {
 
 	public void setClassName(String className) {
 		this.className = className;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
 	}
 
 	public int getAge() {

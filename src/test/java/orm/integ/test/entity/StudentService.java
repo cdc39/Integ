@@ -25,14 +25,20 @@ public class StudentService extends EntityAccessService<Student> {
 		config.addNameMapping("className", "schoolClassId");
 	}
 	
-	public void testTran() {
+	public void tran1() {
 		Student s = new Student();
 		s.setName("张三");
 		eao.insert(s);
 		s.setName("李四");
 		eao.update(s, "name");
-		throw new Error("模拟发生错误");
+		throw new RuntimeException("模拟发生错误");
 	}
+	
+	static void testTran() {
+		StudentService service = new StudentService();
+		service.executeTransaction("tran1");
+	}	
+	
 	@Override
 	protected void fillExtendFields(Student stu) {
 		if (stu.getBirthday()!=null) {
@@ -51,4 +57,5 @@ public class StudentService extends EntityAccessService<Student> {
 		int dis = (y2-y1);
 		return dis;
 	}
+	
 }

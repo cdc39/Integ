@@ -1,4 +1,4 @@
-package orm.integ.test;
+package orm.integ.test; 
 
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import orm.integ.utils.Convertor;
 
 public class Test1 {
 
-	static {
+	static { 
 		Log4jHelper.initLogger();
 	}
 	
