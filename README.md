@@ -85,48 +85,51 @@ public class StudentService extends EntityAccessService<Student> {
 	@Override
 	protected void fillExtendFields(Student stu) {	}
 	
-	public void add() {
+	// 增加/修改/删除 操作示范
+	public void testCUD() {
+		
+		// 增加
 		Student st = new Student();
 		st.setId("s1");
 		st.setName("小明");
 		st.setSchoolClassId(1);
 		eao.insert(st);
-	}
 
-	public void update() {
-		Student st = eao.getById("s1");
+		// 修改
+		st = eao.getById("s1");
 		st.setName("小华");
 		eao.update(st, "name");
-	}
-	
-	public void delete() {
+		
+		// 删除
 		eao.deleteById("s1");
+	}
+
+	// 查询操作示范
+	public void testQuery() {
+
+		// 单表模式化查询
+		TabQuery req = new TabQuery();
+		req.addWhereItem("school_class_id=?", 1);
+		List<Student> list1 = eao.query(req);
+
+		// 自由SQL查询
+		SqlQuery sqlReq = new SqlQuery("select * from tb_student where student_id=?", "s1");
+		List<Student> list2 = eao.query(sqlReq);
+
+		// 查询记录数
+		int count = eao.queryCount("school_class_id=?", 1);
+
+		// 分页查询
+		TabQuery tq = new TabQuery();
+		tq.addWhereItem("school_class_id=?", 1);
+		tq.setPageInfo(21, 10);
+		PageData page = eao.pageQuery(tq);		
+		
 	}
 	
 }
 
 ```
 
-查询（以下代码都在 StudentService 内部 ）
-
-```java
-// 单表模式化查询
-TabQuery req = new TabQuery();
-req.addWhereItem("school_class_id=?", 1);
-List<Student> list = eao.query(req);
-
-// 自由SQL查询
-SqlQuery sqlReq = new SqlQuery("select * from tb_student where student_id=?", "s1");
-List<Student> list = studentEao.query(sqlReq);
-
-// 查询记录数
-int count = eao.queryCount("school_class_id=?", 1);
-
-// 分页查询
-TabQuery tq = new TabQuery();
-tq.addWhereItem("school_class_id=?", 1);
-tq.setPageInfo(21, 10);
-PageData page = eao.pageQuery(tq);
-```
 
 
