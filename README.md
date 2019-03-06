@@ -149,7 +149,7 @@ public class StudentService extends EntityAccessService<Student> {
 每一个Service类里面都会包含一个eao对象和一个dao对象，eao（EntityAccessObject类型）对象用于处理特定类型（比如Student）的实体对象，dao（DataAccessObject）对象用于数据库相关操作。eao以dao为基础，为Service层提供支持。
 
 ## ORM框架对比
-![orms](http://www.bigtre.com/integorm/orms.png)
+![orms](http://www.bigtre.com/integorm/ormcmp.png)
 
 ## 结语
 
