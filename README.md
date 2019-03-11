@@ -1,4 +1,4 @@
-# 简单又强大的新一代Java持久层框架：Integ ORM
+# 简洁完整的新一代Java持久层框架：Integ ORM
 
 ## Integ ORM简介
 
@@ -148,11 +148,12 @@ public class StudentService extends EntityAccessService<Student> {
 
 每一个Service类里面都会包含一个eao对象和一个dao对象，eao（EntityAccessObject类型）对象用于处理特定类型（比如Student）的实体对象，dao（DataAccessObject）对象用于数据库相关操作。eao以dao为基础，为Service层提供支持。
 
-
+## ORM框架对比
+![orms](http://www.bigtre.com/integorm/ormcmp.png)
 
 ## 结语
 
-ORM问题域的需求，是需要直接操作对象而不是操作数据库，需要增删改查功能，需要缓存，需要事务，需要广泛的适应性，灵活的扩展性，这些Integ都能提供。未来要适配几十种数据库，适配Redis，适配分库分表，要改起来都不算难事。因此 Integ 可以说是功能完备的ORM框架。
+ORM问题域的需求，是需要直接操作对象而不是操作数据库，需要增删改查功能，需要缓存，需要事务，需要广泛的适应性，灵活的扩展性，这些Integ都能提供。未来要适配几十种数据库，适配Redis，适配分库分表，也都不难。因此 Integ 可以说是功能近乎完备的ORM框架。
 
 同时Integ还做到了极简。目前Integ代码只有48K，发展到究极形态，估计也不会超过300K。
 
@@ -160,10 +161,10 @@ Hibernate较EJB更轻量级
 MyBatis较Hibernate更轻量级
 Integ较MyBatis更轻量级
 
-轻量级不代表功能弱，比如MyBatis是没有提供分页查询功能的，有大牛写了个广受欢迎的MyBatis的分页查询的插件PageHelper，就用去了200K代码。然而在Integ里面不用插件，已经天然集成了分页查询功能。
+轻量级不代表功能弱，比如MyBatis是没有提供分页查询功能的，有大牛写了个广受欢迎的MyBatis的分页查询的插件PageHelper，就用去了200K代码。而在Integ里面不用插件，已经天然集成了分页查询功能。
 
 代码少说明结构简单，逻辑简单。面对简单的结构和逻辑，不论是学习，还是要修改扩展，都会更简单，更轻松，可以省下来很多宝贵的时间。
 
-如果你对Hibernate复杂的注解搞得头晕脑胀、战战兢兢，如果你对MyBatic动态条件查询的实现方式（在配置文件中而不是在java代码中）感到怪异，如果你厌烦了隔绝了底层代码，让逻辑陡然复杂起来的动态代理，那么来试试 Integ 吧，你会发现这里有更简洁、更优雅的解决方案。
+如果你对Hibernate复杂的注解搞得头晕脑胀，如果你对MyBatic动态条件查询的实现方式（在配置文件中而不是在java代码中）感到怪异，如果你厌烦了隔绝了底层代码，让逻辑陡然复杂起来的动态代理，那么来试试 Integ 吧，你会发现这里有更简洁、更优雅的解决方案。
 
-欢迎大家下载使用。并欢迎提出改进意见，帮助测试、修改，一起努力让Integ完善起来。 谢谢！
+欢迎大家下载使用。
