@@ -72,13 +72,13 @@ public class FieldInfo {
 		return null;
 	}
 	
-	public void setValue(Entity entity, Object value) {
+	public void setValue(Object obj, Object value) {
 		if (setter==null) {
 			return;
 		}
 		Object val = Convertor.translate(value, field.getType());
 		try {
-			setter.invoke(entity, val);
+			setter.invoke(obj, val);
 		}catch(Exception e) {
 			MyLogger.printError(e, "field:"+name+", value="+value.getClass().getName()+":"+value);
 		}

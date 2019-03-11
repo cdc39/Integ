@@ -13,6 +13,8 @@ import java.util.Set;
 
 import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.DataAccessObject;
+import orm.integ.eao.annotation.EntityAnno;
+import orm.integ.eao.annotation.ForeignKey;
 import orm.integ.utils.ClassAnalyzer;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.StringUtils;

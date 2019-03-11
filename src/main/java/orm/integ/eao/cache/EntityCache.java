@@ -19,10 +19,8 @@ public abstract class EntityCache<T extends Entity> implements DataChangeListene
 	@Override
 	public void notifyChange(DataChange change) {
 		try {
-			if (change.getType()==ChangeTypes.INSERT) {
-				this.put((T) change.getAfter());
-			}
-			else if (change.getType()==ChangeTypes.UPDATE) {
+			int type = change.getType();
+			if (type==ChangeTypes.INSERT||type==ChangeTypes.UPDATE) {
 				this.put((T) change.getAfter());
 			}
 			else if (change.getType()==ChangeTypes.DELETE) {

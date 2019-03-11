@@ -1,10 +1,13 @@
 package orm.integ.eao.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.sql.TableInfo;
+import orm.integ.eao.annotation.EntityAnno;
 import orm.integ.utils.StringUtils;
 
 public class EntityModel implements TableInfo {
@@ -42,7 +45,7 @@ public class EntityModel implements TableInfo {
 		return entityAnno;
 	}
 	
-	public Class<? extends Entity> entityClass() {
+	public Class<? extends Entity> getEntityClass() {
 		return entityClass;
 	}
 	
@@ -90,6 +93,24 @@ public class EntityModel implements TableInfo {
 
 	public FieldInfo[] getFields() {
 		return fields;
+	}
+	
+	public String[] getFieldsExcept(String ...exceptFields) {
+		List<String> restFields = new ArrayList<>();
+		boolean found;
+		for (FieldInfo field: fields) {
+			found = false;
+			for (String except: exceptFields) {
+				if (field.getName().equalsIgnoreCase(except)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				restFields.add(field.getName());
+			}
+		}
+		return restFields.toArray(new String[]{});
 	}
 	
 	public String[] getDefaultListFields() {

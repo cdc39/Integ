@@ -33,11 +33,11 @@ import orm.integ.eao.model.FieldMapping;
 import orm.integ.eao.model.ForeignUse;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
-import orm.integ.eao.transaction.DataChange;
+import orm.integ.eao.transaction.ChangeFactory;
+import orm.integ.eao.transaction.FieldChange;
 import orm.integ.utils.Convertor;
-import orm.integ.utils.FieldChange;
 import orm.integ.utils.IntegError;
-import orm.integ.utils.ObjectHandler;
+import orm.integ.utils.MyLogger;
 
 public class EntityAccessObject<T extends Entity> implements IEntityAccessObject<T> {
 
@@ -182,11 +182,12 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return getAll(10000);
 	}
 	
-	public T getFirst(List<T> list) {
+	protected T getFirst(List<T> list) {
 		return list==null||list.size()==0?null:list.get(0);
 	}
 	
 	public T queryFirst(QueryRequest req) {
+		req.setPageInfo(1, 1);
 		List<T> list = this.query(req);
 		return this.getFirst(list);
 	}
@@ -196,7 +197,11 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		req.addWhereItem(where, values);
 		req.setOrder(order);
 		return queryFirst(req);
-	}	
+	}
+	
+	public T querySingle(String where, Object... values) {
+		return queryFirst(where, null, values);
+	}
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -224,9 +229,9 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		dao.insert(em.getTableName(), colValues);
 		putToCache(entity);
 		
-		service.afterChange0(DataChange.newInsert(entity));
+		service.afterChange0(ChangeFactory.newInsert(entity));
 	}
-
+	
 	protected String createNewIdNoRepeat() {
 		String newId;
 		int testCount = 0, count;
@@ -255,12 +260,12 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 			testForienUseBeforeDelete(id);
 		}
 		dao.deleteById(em.getFullTableName(), em.getKeyColumn(), id);
-		service.afterChange0(DataChange.newDelete(entity));
+		service.afterChange0(ChangeFactory.newDelete(entity));
 	}
 	
 	@SuppressWarnings("rawtypes")
 	public void testForienUseBeforeDelete(Object id) {
-		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.entityClass());
+		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.getEntityClass());
 		for (FieldInfo fkField: fkFields) {
 			if (fkField.columnExists()) {
 				EntityAccessObject eao = Eaos.getEao(fkField.getEntityClass());
@@ -276,7 +281,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	@SuppressWarnings("rawtypes")
 	public List<ForeignUse> scanForeignUse(Object id) {
 		List<ForeignUse> uses = new ArrayList<>();
-		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.entityClass());
+		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.getEntityClass());
 		for (FieldInfo fkField: fkFields) {
 			if (fkField.columnExists()) {
 				EntityAccessObject eao = Eaos.getEao(fkField.getEntityClass());
@@ -292,13 +297,13 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	@SuppressWarnings("rawtypes")
 	public void printForeignUse(Object id) {
 		
-		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.entityClass());
+		List<FieldInfo> fkFields = EntityModels.getForeignKeyFields(em.getEntityClass());
 		List<ForeignUse> uses = scanForeignUse(id);
 		int total = 0;
 		for (ForeignUse fu: uses) {
 			total+=fu.getRecordCount();
 		}
-		String info = "实体类 "+em.entityClass().getSimpleName()+" 的主键 "
+		String info = "实体类 "+em.getEntityClass().getSimpleName()+" 的主键 "
 				+ em.getTableName() + "."+em.getKeyColumn()+" 总共对应  "+fkFields.size()+" 外键字段，"
 				+ "id值 "+id+" 在 "+uses.size()+" 个外键字段出现了 "+total+" 次：";
 		System.out.println("\n"+info);
@@ -319,17 +324,19 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		cache.clear();
 	}
 	
-	public void updateChangedValues(T afterChange) {
-		T current = this.load(afterChange.getId());
-		if (current==null) {
+	
+	
+	public void update(T after) {
+		T before = this.load(after.getId());
+		if (before==null) {
 			return;
 		}
-		List<FieldChange> fieldChanges = ObjectHandler.findDifferents(current, afterChange);
+		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(before, after);
 		List<String> fields = new ArrayList<>();
 		for(FieldChange fc:fieldChanges) {
 			fields.add(fc.getFieldName());
 		}
-		update(afterChange, fields.toArray(new String[0]));
+		update(after, fields.toArray(new String[0]));
 	}
 	
 	public void update(T entity, String fieldNames) {
@@ -338,6 +345,12 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	
 	@Override
 	public void update(T entity, String[] fieldNames) {
+		if (entity==null || fieldNames==null || fieldNames.length==0) {
+			if (entity==null) {
+				MyLogger.printError(new Throwable(), "entity is null!");
+			}
+			return ;
+		}
 		String fieldName, colName;
 		Object value;
 		FieldInfo field;
@@ -362,7 +375,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		dao.update(em.getTableName(), updateFields, where);
 		service.fillExtendFields(entity);
 		T old = load(entity.getId());
-		service.afterChange0(DataChange.newUpdate(old, entity));
+		service.afterChange0(ChangeFactory.newUpdate(old, entity));
 	}
 	
 	@SuppressWarnings("unchecked")

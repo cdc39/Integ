@@ -2,11 +2,11 @@ package orm.integ.utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
+import orm.integ.eao.model.Record;
 
 
 public class ObjectHandler {
@@ -27,50 +27,11 @@ public class ObjectHandler {
 		return null;
 	}
 	
-	public static void merge(Object src, Object dest) throws Exception {
-		List<FieldChange> diffs = findDifferents(dest, src);
-		ObjectHandler obh = new ObjectHandler(dest);
-		for (FieldChange ch: diffs) {
-			obh.setValue(ch.getFieldName(), ch.getAfterValue());
-		}
-	}
-	
-	public static List<FieldChange> findDifferents(Object before, Object after) {
-		List<FieldChange> changes = new ArrayList<>();
-		if (before.getClass()!=after.getClass()) {
-			return changes;
-		}
-		Map<String, Object> values;
-		try {
-			values = new ObjectHandler(before).getValueMap();
-			Object v1, v2;
-			ObjectHandler obh2 = new ObjectHandler(after);
-			FieldChange change;
-			for (String field:values.keySet()) {
-				v1 = values.get(field);
-				v2 = obh2.getValue(field);
-				if ((v1==null && v2!=null) || !v1.equals(v2)) {
-					change = new FieldChange();
-					change.setFieldName(field);
-					change.setBeforeValue(v1);
-					change.setAfterValue(v2);
-					changes.add(change);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return changes;
-	}
-	
 	private Object object;
-	@SuppressWarnings("rawtypes")
-	protected Class objectClass;
 	private ClassAnalyzer ca;
 	
 	public ObjectHandler(Object object) {
-		this.objectClass = object.getClass();
-		this.ca = ClassAnalyzer.get(objectClass);
+		this.ca = ClassAnalyzer.get(object);
 		this.object = object;
 	}
 	
@@ -83,7 +44,6 @@ public class ObjectHandler {
 		Object value = getValue(f) ;
 		return value==null?null:value.toString(); 
 	}
-	
 	
 	public Object getValue(String fieldName) {
 		Field field = ca.getField(fieldName);
@@ -117,9 +77,11 @@ public class ObjectHandler {
 	public void setValues(Map valueMap)  {
 		Iterator it = valueMap.keySet().iterator();
 		String name;
+		Object value;
 		while (it.hasNext()) {
 			name = (String)it.next();
-			setValue(name, valueMap.get(name));
+			value = valueMap.get(name);
+			setValue(name, value);
 		}
 	}
 	
@@ -168,16 +130,30 @@ public class ObjectHandler {
 		}
 	}
 	
-	public Map<String, Object> getValueMap() {
-		return getValueMap(ca.getNormalFields());
+	public Record toRecord() {
+		Record rec = new Record();
+		Object value;
+		String strVal;
+		for (String fieldName:ca.getNormalFields()) {
+			value = getValue(fieldName);
+			if (value!=null) {
+				strVal = Convertor.toString(value);
+				rec.put(fieldName, strVal);
+			}
+		}
+		return rec;
+	}
+	
+	public Map<String, Object> getValueMap(boolean includeNull) {
+		return getValueMap(ca.getNormalFields(), includeNull);
 	}
 
-	public Map<String, Object> getValueMap(String[] fields) {
+	public Map<String, Object> getValueMap(String[] fields, boolean includeNull) {
 		Map<String, Object> values = new HashMap<>();
 		Object value;
 		for (String fieldName:fields) {
 			value = getValue(fieldName);
-			if (value!=null) {
+			if (includeNull || value!=null) {
 				values.put(fieldName, value);
 			}
 		}
@@ -188,13 +164,15 @@ public class ObjectHandler {
 		return this.object;
 	}
 	
-	public ClassAnalyzer getClassAnalyzer() {
-		return this.ca;
-	}
-
 	public void copyValuesFrom(Object src) {
 		ObjectHandler obh = new ObjectHandler(src);
-		Map<String, Object> values = obh.getValueMap();
+		Map<String, Object> values = obh.getValueMap(true);
+		this.setValues(values);
+	}
+
+	public void copyValuesFrom(Object obj, String[] fields) {
+		ObjectHandler obh = new ObjectHandler(obj);
+		Map<String, Object> values = obh.getValueMap(fields, true);
 		this.setValues(values);
 	}
 	

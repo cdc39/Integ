@@ -87,7 +87,7 @@ public abstract class EntityAccessService<T extends Entity> {
 			}
 			else if (change.getType()==ChangeTypes.UPDATE) {
 				T entity = (T) change.getBefore();
-				eao.updateChangedValues(entity);
+				eao.update(entity);
 			}
 		}
 		

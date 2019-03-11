@@ -218,6 +218,10 @@ public class DataAccessObject {
 		return list;
 	}
 	
+	public List query(StatementAndValue sql, RowMapper rowMapper) {
+		return query(sql.getStatement(), sql.getValues(), rowMapper);
+	}	
+	
 	@SuppressWarnings("unchecked")
 	public <X> X querySingle(String sql, Object[] values, RowMapper rowMapper) {
 		List list = query(sql, values, rowMapper);
@@ -478,5 +482,7 @@ public class DataAccessObject {
 	public boolean isNull(String s) {
 		return s==null||s.trim().equals("");
 	}
+
+
 	
 }

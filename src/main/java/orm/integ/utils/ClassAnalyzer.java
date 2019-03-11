@@ -17,7 +17,8 @@ public class ClassAnalyzer {
 	private static final Map<String, ClassAnalyzer> cas = 
 			new HashMap<String, ClassAnalyzer>();
 	
-	public static ClassAnalyzer get(Class c) {
+	public static ClassAnalyzer get(Object obj) {
+		Class c = obj instanceof Class?(Class)obj:obj.getClass();
 		ClassAnalyzer ca = cas.get(c.getName());
 		if (ca==null) {
 			ca = new ClassAnalyzer(c);
@@ -123,7 +124,11 @@ public class ClassAnalyzer {
 	
 	public Method getSetterMethod(Field field) {
 		String methodName = getSetterName(field.getName());
-		return getMethod(methodName, field.getType());
+		Method method = getMethod(methodName, field.getType());
+		if (method==null) {
+			method = getMethod(methodName, Object.class);
+		}
+		return method;
 	}
 	
 	private String getSetterName(String fieldName)

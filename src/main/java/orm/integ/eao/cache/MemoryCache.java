@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import orm.integ.eao.model.Entity;
-import orm.integ.utils.MyLogger;
-import orm.integ.utils.ObjectHandler;
 
 public class MemoryCache<T extends Entity> extends EntityCache<T> {
 
@@ -31,17 +29,7 @@ public class MemoryCache<T extends Entity> extends EntityCache<T> {
 		if (entity==null) {
 			return;
 		}
-		T old = data.get(entity.getId());
-		if (old==null) {
-			data.put(entity.getId(), entity);
-		}
-		else {
-			try {
-				ObjectHandler.merge(entity, old);
-			} catch (Exception e) {
-				MyLogger.printError(e);
-			}
-		}
+		data.put(entity.getId(), entity);
 	}
 	
 	@Override

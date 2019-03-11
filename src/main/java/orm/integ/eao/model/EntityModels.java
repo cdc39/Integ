@@ -11,7 +11,7 @@ public class EntityModels {
 	private static Map<String, List<FieldInfo>> fkMap = new HashMap<>(); 
 	
 	static void putEntityModel(EntityModel em) {
-		ems.put(em.entityClass().getName(), em);
+		ems.put(em.getEntityClass().getName(), em);
 	}
 	
 	public static List<FieldInfo> getForeignKeyFields(Class<? extends Entity> clazz) {
