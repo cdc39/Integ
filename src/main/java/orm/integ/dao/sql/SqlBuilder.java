@@ -55,14 +55,6 @@ public abstract class SqlBuilder {
 		return sql.replaceAll("\\*", req.getKeyColumn());
 	}
 	
-//	public abstract String makeQueryFirstIdSql() ;
-	
-//	public abstract String makeQueryMaxOrderNoSQL();
-	
-//	public String makePageQuerySql(String originSql, int start, int limit) {
-//		return "select * from ("+originSql+") limit "+start+","+limit;
-//	}
-	
 	public String makeQuerySql(QueryRequest req) {
 		if (req instanceof TabQuery) {
 			TabQuery tq = (TabQuery)req;
@@ -100,7 +92,7 @@ public abstract class SqlBuilder {
 		}
 		else {
 			SqlQuery sq = (SqlQuery)req;
-			return "select count(*) from (" + sq.getSql() + ")";
+			return "select count(*) from (" + sq.getSql() + ") tt";
 		}
 		
 	}

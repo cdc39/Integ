@@ -1,5 +1,7 @@
 package orm.integ.dao.sql;
 
+import orm.integ.utils.StringUtils;
+
 public abstract class QueryRequest implements Cloneable {
 
 	public static final int PAGE_QUERY_MAX_RETURN = 2000;
@@ -10,6 +12,8 @@ public abstract class QueryRequest implements Cloneable {
 
 	
 	protected String tableName;
+	
+	protected String[] keyColumns;
 	
 	protected String keyColumn;
 	
@@ -25,18 +29,28 @@ public abstract class QueryRequest implements Cloneable {
 	
 	protected String[] viewFields;
 	
+	protected boolean useCache = true;
+	
+	public void setUseCache(boolean useCache){
+		this.useCache = useCache;
+	}
+	
+	public boolean useCache() {
+		return useCache;
+	}
+	
 	public OrderGroup getOrder() {
 		return order;
 	}
 	
 	public void setTableInfo(TableInfo table) {
-		this.tableName = table.getFullTableName();
-		this.keyColumn = table.getKeyColumn();
+		this.setTableInfo(table.getFullTableName(), table.getKeyColumns());
 	}
 	
-	public void setTableInfo(String tableName, String keyColumn) {
+	public void setTableInfo(String tableName, String[] keyColumns) {
 		this.tableName = tableName;
-		this.keyColumn = keyColumn;
+		this.keyColumns = keyColumns;
+		this.keyColumn = StringUtils.link(keyColumns, ",");
 	}
 	
 	public String getTableName() {
@@ -45,6 +59,10 @@ public abstract class QueryRequest implements Cloneable {
 	
 	public String getKeyColumn() {
 		return keyColumn;
+	}
+	
+	public String[] getKeyColumns() {
+		return keyColumns;
 	}
 	
 	public int getStart() {

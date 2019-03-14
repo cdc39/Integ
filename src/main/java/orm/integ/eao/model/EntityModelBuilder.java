@@ -134,14 +134,14 @@ public class EntityModelBuilder implements EntityConfig {
 		
 		model.setFields(fields);
 		
-		model.defaultListFields = defaultListFields;
+		model.listFields = defaultListFields;
 		if (defaultListFields==null) {
-			model.defaultListFields = getExceptRestFields(listExceptFields);
+			model.listFields = getExceptRestFields(listExceptFields);
 		}
 		
-		model.defaultDetailFields = defaultDetailFields;
+		model.detailFields = defaultDetailFields;
 		if (defaultDetailFields==null) {
-			model.defaultDetailFields = getExceptRestFields(detailExceptFields);
+			model.detailFields = getExceptRestFields(detailExceptFields);
 		}
 		
 		String colName;
@@ -207,12 +207,12 @@ public class EntityModelBuilder implements EntityConfig {
 	}
 	
 	@Override
-	public void setDefaultListFields(String... fields) {
+	public void setListFields(String... fields) {
 		this.defaultListFields = formatViewFields(fields);
 	}
 	
 	@Override
-	public void setDefaultDetailFields(String... fields) {
+	public void setDetailFields(String... fields) {
 		this.defaultDetailFields = formatViewFields(fields);
 	}
 	
@@ -255,7 +255,7 @@ public class EntityModelBuilder implements EntityConfig {
 	}
 	
 	@Override
-	public void addFieldMapping(String fieldName, String foreignKeyField, String relFieldName) {
+	public void setFieldMapping(String fieldName, String foreignKeyField, String relFieldName) {
 		
 		FieldInfo fkField = getField(foreignKeyField);
 		
@@ -279,19 +279,21 @@ public class EntityModelBuilder implements EntityConfig {
 	}
 
 	@Override
-	public void addNameMapping(String fieldName, String foreignKeyField) {
-		addFieldMapping(fieldName, foreignKeyField, "name");
+	public void setNameMapping(String fieldName, String foreignKeyField) {
+		setFieldMapping(fieldName, foreignKeyField, "name");
 	}
 	
 	@Override
-	public void addListFieldExcept(String... fields) {
+	public void setListFieldExcept(String... fields) {
+		listExceptFields.clear();
 		for (String f: fields) {
 			listExceptFields.add(f);
 		}
 	}
 	
 	@Override
-	public void addDetailFieldExcept(String... fields) {
+	public void setDetailFieldExcept(String... fields) {
+		detailExceptFields.clear();
 		for (String f: fields) {
 			detailExceptFields.add(f);
 		}

@@ -21,8 +21,8 @@ public class EntityModel implements TableInfo {
 	String fullTableName;
 	String keyColumn;
 	ColumnInfo[] tableColumns ;
-	String[] defaultListFields;
-	String[] defaultDetailFields;
+	String[] listFields;
+	String[] detailFields;
 	String[] noFieldColumns;
 	
 	FieldInfo[] fields;
@@ -68,6 +68,11 @@ public class EntityModel implements TableInfo {
 	public String getKeyColumn() {
 		return keyColumn;
 	}
+	
+	public String[] getKeyColumns() {
+		return new String[]{keyColumn};
+	}
+	
 	public ColumnInfo[] getColumns() {
 		return tableColumns;
 	}
@@ -113,12 +118,12 @@ public class EntityModel implements TableInfo {
 		return restFields.toArray(new String[]{});
 	}
 	
-	public String[] getDefaultListFields() {
-		return notEmptyFields(defaultListFields);
+	public String[] getListFields() {
+		return notEmptyFields(listFields);
 	}
 	
-	public String[] getDefaultDetailFields() {
-		return notEmptyFields(defaultDetailFields);
+	public String[] getDetailFields() {
+		return notEmptyFields(detailFields);
 	}
 	
 	public String[] getNoFieldColumns() {

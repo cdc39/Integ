@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import orm.integ.eao.model.Record;
-
 
 public class ObjectHandler {
 	
@@ -33,16 +31,6 @@ public class ObjectHandler {
 	public ObjectHandler(Object object) {
 		this.ca = ClassAnalyzer.get(object);
 		this.object = object;
-	}
-	
-	public String getStringValue(String fieldName) {
-		Object value = getValue(fieldName) ;
-		return value==null?null:Convertor.toString(value); 
-	}
-	
-	public String getStringValue(Field f) throws Exception {
-		Object value = getValue(f) ;
-		return value==null?null:value.toString(); 
 	}
 	
 	public Object getValue(String fieldName) {
@@ -73,9 +61,8 @@ public class ObjectHandler {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public void setValues(Map valueMap)  {
-		Iterator it = valueMap.keySet().iterator();
+	public void setValues(Map<String, Object> valueMap)  {
+		Iterator<String> it = valueMap.keySet().iterator();
 		String name;
 		Object value;
 		while (it.hasNext()) {
@@ -130,25 +117,11 @@ public class ObjectHandler {
 		}
 	}
 	
-	public Record toRecord() {
-		Record rec = new Record();
-		Object value;
-		String strVal;
-		for (String fieldName:ca.getNormalFields()) {
-			value = getValue(fieldName);
-			if (value!=null) {
-				strVal = Convertor.toString(value);
-				rec.put(fieldName, strVal);
-			}
-		}
-		return rec;
-	}
-	
-	public Map<String, Object> getValueMap(boolean includeNull) {
-		return getValueMap(ca.getNormalFields(), includeNull);
+	public Map<String, Object> getValues(boolean includeNull) {
+		return getValues(ca.getNormalFields(), includeNull);
 	}
 
-	public Map<String, Object> getValueMap(String[] fields, boolean includeNull) {
+	public Map<String, Object> getValues(String[] fields, boolean includeNull) {
 		Map<String, Object> values = new HashMap<>();
 		Object value;
 		for (String fieldName:fields) {
@@ -166,13 +139,13 @@ public class ObjectHandler {
 	
 	public void copyValuesFrom(Object src) {
 		ObjectHandler obh = new ObjectHandler(src);
-		Map<String, Object> values = obh.getValueMap(true);
+		Map<String, Object> values = obh.getValues(true);
 		this.setValues(values);
 	}
 
 	public void copyValuesFrom(Object obj, String[] fields) {
 		ObjectHandler obh = new ObjectHandler(obj);
-		Map<String, Object> values = obh.getValueMap(fields, true);
+		Map<String, Object> values = obh.getValues(fields, true);
 		this.setValues(values);
 	}
 	

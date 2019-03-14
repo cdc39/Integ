@@ -6,6 +6,6 @@ public interface TableInfo {
 	
 	public String getFullTableName();
 	
-	public String getKeyColumn();
+	public String[] getKeyColumns();
 	
 }

@@ -37,6 +37,11 @@ public class QueryManager<T extends Entity> implements DataChangeListener {
 	}
 
 	public int queryCount(QueryRequest req) {
+		
+		if (!req.useCache()) {
+			return dao.queryCount(req);
+		}
+		
 		CountQueryCache cache = countQueryCaches.get(req.getCountQueryHashCode());
 		if (cache==null) {
 			cache = new CountQueryCache(req);
@@ -52,6 +57,11 @@ public class QueryManager<T extends Entity> implements DataChangeListener {
 	}
 
 	public List<String> queryIdList(QueryRequest req) {
+		
+		if (!req.useCache()) {
+			return dao.queryIds(req);
+		}
+		
 		QueryRequest cacheDataQuery = makeIdCacheQueryRequest(req);
 		IdQueryCache cache = idQueryCaches.get(cacheDataQuery.hashCode());
 		if (cache==null) {

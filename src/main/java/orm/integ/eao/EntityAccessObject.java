@@ -98,6 +98,10 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return em;
 	}
 	
+	public QueryManager<T> getQueryManager() {
+		return this.queryManager;
+	}
+	
 	private void fillFieldValues(T entity, ResultSet rset) throws Exception  {
 		FieldInfo field;
 		Object value;
@@ -336,7 +340,9 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		for(FieldChange fc:fieldChanges) {
 			fields.add(fc.getFieldName());
 		}
-		update(after, fields.toArray(new String[0]));
+		if (fields.size()>0) {
+			update(after, fields.toArray(new String[0]));
+		}
 	}
 	
 	public void update(T entity, String fieldNames) {
@@ -398,19 +404,33 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return query(query);
 	}
 	
+	public List<T> queryByIds(List<String> ids) {
+		List<T> list = new ArrayList<>();
+		T entity;
+		for (String id: ids) {
+			entity = this.getById(id);
+			list.add(entity);
+		}
+		return list;
+	}
+	
 	@Override
 	public PageData pageQuery(QueryRequest req) {
 		req.setTableInfo(em);
 		List<String> ids = queryManager.queryIdList(req);
-		List<T> list = this.getByIds(ids);
 		int count = queryManager.queryCount(req);
+
+		List<T> list = this.getByIds(ids);
+		
 		String[] fields = req.getViewFields();
 		if (fields==null || fields.length==0) {
-			fields = em.getDefaultListFields();
+			fields = em.getListFields();
 		}
 		List<Record> viewList = this.toRecords(list, fields);
 		return new PageData(viewList, count);
 	}
+	
+	
 	
 	@Override
 	public Record toRecord(T entity, String[] viewFields) {
@@ -421,14 +441,14 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 			field = em.getFieldInfo(fieldName);
 			value = getFieldValue(entity, field, true);
 			if (value!=null) {
-				record.put(fieldName, Convertor.toString(value));
+				record.put(fieldName, value);
 			}
 		}
 		return record;
 	}
 	
 	public Record toDetailRecord(T entity) {
-		return toRecord(entity, em.getDefaultDetailFields());
+		return toRecord(entity, em.getDetailFields());
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -453,7 +473,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	}
 	
 	public List<Record> toRecords(List<T> list) {
-		return toRecords(list, em.getDefaultListFields());
+		return toRecords(list, em.getListFields());
 	}
 	
 	@Override
