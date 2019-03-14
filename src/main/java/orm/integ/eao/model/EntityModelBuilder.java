@@ -13,8 +13,8 @@ import java.util.Set;
 
 import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.DataAccessObject;
-import orm.integ.eao.annotation.EntityAnno;
 import orm.integ.eao.annotation.ForeignKey;
+import orm.integ.eao.annotation.Table;
 import orm.integ.utils.ClassAnalyzer;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.StringUtils;
@@ -22,10 +22,9 @@ import orm.integ.utils.StringUtils;
 @SuppressWarnings("rawtypes")
 public class EntityModelBuilder implements EntityConfig {
 
-	private EntityAnno entityAnno;
+	private Table table;
 
 	private final Class<? extends Entity> entityClass;
-	private String classId;
 	private String tableName;
 	private String tableKeyName;
 	private String tableSchema;
@@ -36,9 +35,11 @@ public class EntityModelBuilder implements EntityConfig {
 	private String[] normalFields ;
 	private String[] defaultListFields ;
 	private String[] defaultDetailFields;
+	
+	boolean foreignUseCheckOnDelete = true;
+	
 	private Map<String, FieldInfo> fieldInfos = new HashMap<>();
 	
-	private Set<String> listExceptFields = new HashSet<>();
 	private Set<String> detailExceptFields = new HashSet<>();
 	
 	private EntityModel model;
@@ -47,14 +48,13 @@ public class EntityModelBuilder implements EntityConfig {
 	public EntityModelBuilder(Class entityClass, DataAccessObject dao) {
 		
 		this.entityClass = entityClass;
-		entityAnno = (EntityAnno) entityClass.getAnnotation(EntityAnno.class);
-		classId = entityAnno.classId();
+		table = (Table) entityClass.getAnnotation(Table.class);
 		
 		ClassAnalyzer ca = ClassAnalyzer.get(entityClass);
 		normalFields = ca.getNormalFields();
 		
-		tableName = entityAnno.table();
-		tableSchema = entityAnno.schema().trim();
+		tableName = table.name();
+		tableSchema = table.schema().trim();
 		fullTableName = tableName;
 		if (tableSchema.trim().length()>0) {
 			fullTableName = tableSchema+"."+tableName;
@@ -97,14 +97,9 @@ public class EntityModelBuilder implements EntityConfig {
 	
 	private String getTableKeyName() {
 		String tableKeyName = tableName;
-		if (!isNull(entityAnno.shortName())) {
-			tableKeyName = entityAnno.shortName().trim().toLowerCase();
-		}
-		else {
-			int pos = tableName.indexOf("_");
-			if (pos>=0&&pos<=3) {
-				tableKeyName = tableName.substring(pos+1);
-			}
+		int pos = tableName.indexOf("_");
+		if (pos>=0&&pos<=3) {
+			tableKeyName = tableName.substring(pos+1);
 		}
 		return tableKeyName;
 	}
@@ -114,8 +109,7 @@ public class EntityModelBuilder implements EntityConfig {
 		if (model==null) {
 			model = new EntityModel();
 		}
-		model.entityAnno = entityAnno;
-		model.classId = classId;
+		model.entityAnno = table;
 		model.entityClass = entityClass;
 		model.tableName = tableName;
 		model.tableKeyName = tableKeyName;
@@ -123,6 +117,7 @@ public class EntityModelBuilder implements EntityConfig {
 		model.fullTableName = fullTableName;
 		model.keyColumn = keyColumn;
 		model.tableColumns = tableColumns.toArray(new ColumnInfo[0]);
+		model.foreignUseCheckOnDelete = foreignUseCheckOnDelete;
 		
 		List<String> fieldNames = getAllFieldName();
 		
@@ -136,7 +131,7 @@ public class EntityModelBuilder implements EntityConfig {
 		
 		model.listFields = defaultListFields;
 		if (defaultListFields==null) {
-			model.listFields = getExceptRestFields(listExceptFields);
+			model.listFields = fieldNames.toArray(new String[0]);
 		}
 		
 		model.detailFields = defaultDetailFields;
@@ -284,14 +279,6 @@ public class EntityModelBuilder implements EntityConfig {
 	}
 	
 	@Override
-	public void setListFieldExcept(String... fields) {
-		listExceptFields.clear();
-		for (String f: fields) {
-			listExceptFields.add(f);
-		}
-	}
-	
-	@Override
 	public void setDetailFieldExcept(String... fields) {
 		detailExceptFields.clear();
 		for (String f: fields) {
@@ -299,9 +286,9 @@ public class EntityModelBuilder implements EntityConfig {
 		}
 	}
 
-
-	private boolean isNull(String s) {
-		return s==null||s.trim().equals("");
+	@Override
+	public void setForeignUseCheckOnDelete(boolean needCheck) {
+		this.foreignUseCheckOnDelete = needCheck;
 	}
 	
 }

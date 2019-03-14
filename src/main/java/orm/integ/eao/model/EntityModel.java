@@ -7,14 +7,13 @@ import java.util.Map;
 
 import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.sql.TableInfo;
-import orm.integ.eao.annotation.EntityAnno;
+import orm.integ.eao.annotation.Table;
 import orm.integ.utils.StringUtils;
 
 public class EntityModel implements TableInfo {
 
-	EntityAnno entityAnno;
+	Table entityAnno;
 	Class<? extends Entity> entityClass;
-	String classId;
 	String tableKeyName;
 	String tableName;
 	String tableSchema;
@@ -24,6 +23,7 @@ public class EntityModel implements TableInfo {
 	String[] listFields;
 	String[] detailFields;
 	String[] noFieldColumns;
+	boolean foreignUseCheckOnDelete;
 	
 	FieldInfo[] fields;
 	Map<String, FieldInfo> fieldMap = new HashMap<>();
@@ -41,16 +41,12 @@ public class EntityModel implements TableInfo {
 		}
 	}
 	
-	public EntityAnno entityAnno() {
+	public Table entityAnno() {
 		return entityAnno;
 	}
 	
 	public Class<? extends Entity> getEntityClass() {
 		return entityClass;
-	}
-	
-	public String getClassId() {
-		return classId;
 	}
 	
 	public String getTableName() {
@@ -128,6 +124,10 @@ public class EntityModel implements TableInfo {
 	
 	public String[] getNoFieldColumns() {
 		return noFieldColumns;
+	}
+	
+	public boolean needForeignUseCheckOnDelete() {
+		return foreignUseCheckOnDelete;
 	}
 	
 	private String[] notEmptyFields(String[] fields) {

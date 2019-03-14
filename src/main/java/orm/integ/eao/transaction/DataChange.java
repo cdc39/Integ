@@ -53,10 +53,12 @@ public class DataChange {
 		if (type==ChangeTypes.INSERT||type==ChangeTypes.DELETE) {
 			return true;
 		}
-		for (FieldChange fc: fieldChanges) {
-			for (String field: fields) {
-				if (fc.getFieldName().equals(field)) {
-					return true;
+		if (fieldChanges!=null) {
+			for (FieldChange fc: fieldChanges) {
+				for (String field: fields) {
+					if (fc.getFieldName().equals(field)) {
+						return true;
+					}
 				}
 			}
 		}

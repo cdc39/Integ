@@ -166,7 +166,7 @@ public class DataAccessObject {
 				return rset.getString(1);
 			}
 		});
-		log.debug("Get "+list.size()+" items");
+		printGetResult(list.size());
 		return list;
 	}
 	
@@ -213,8 +213,7 @@ public class DataAccessObject {
 		if (list==null) {
 			list = new ArrayList();
 		}
-		//System.out.println(sql);
-		log.debug("get "+list.size()+" items");
+		printGetResult(list.size());
 		return list;
 	}
 	
@@ -244,6 +243,10 @@ public class DataAccessObject {
 			sql = sql + "|" + StringUtils.link(values, ",");
 		}
 		log.info(sql);
+	}
+	
+	private void printGetResult(int getRecordNum) {
+		log.debug("Get "+getRecordNum+" items");
 	}
 
 	public Map statQuery(String sql, Object... values) {
@@ -458,17 +461,19 @@ public class DataAccessObject {
 	}
 	
 	public List queryByIds(String tableName, String keyColumn, Object[] ids, RowMapper rowMapper) {
-
 		if (ids==null || ids.length==0) {
 			return new ArrayList<>();
 		}
-		
 		String sql = "select * from "+tableName+" where "+keyColumn+" in (:ids)";
+		printSql(sql, ids);
+		System.out.println("ids.length="+ids.length);
 		NamedParameterJdbcTemplate namedParameterJdbcTemplate =   
 			    new NamedParameterJdbcTemplate(jdbcTemplate);  
 		MapSqlParameterSource parameters = new MapSqlParameterSource(); 
 		parameters.addValue("ids",Arrays.asList(ids));
 		List list = namedParameterJdbcTemplate.query(sql, parameters, rowMapper);
+		printGetResult(list.size());
+		
 		return list;
 		
 	}

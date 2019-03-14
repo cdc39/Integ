@@ -11,20 +11,16 @@ import orm.integ.eao.model.Record;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class Eaos {
 
-	static Map<String, EntityAccessObject> classIdEaos = new ConcurrentHashMap<>();
-
 	static Map<String, EntityAccessObject> classNameEaos = new ConcurrentHashMap<>();
 
 	public static void addEao(EntityAccessObject eao) {
-		classIdEaos.put(eao.getEntityModel().getClassId(), eao);
 		classNameEaos.put(eao.getEntityModel().getEntityClass().getName(), eao);
 	}
 	
-	public static EntityAccessObject getEao(String classId) {
-		return classIdEaos.get(classId);
-	}
-	
 	public static EntityAccessObject getEao(Class clazz) {
+		if (clazz==null) {
+			return null;
+		}
 		return classNameEaos.get(clazz.getName());
 	}
 	
@@ -46,14 +42,6 @@ public class Eaos {
 		return null;
 	}
 	
-	public static <T> T getEntity(String classId, Object id) {
-		EntityAccessObject eao = getEao(classId);
-		if (eao!=null) {
-			return (T) eao.getById(id);
-		}
-		return null;
-	}
-
 	private static EntityAccessObject getEao(List<? extends Entity> list) {
 		if (list.size()>0) {
 			Class c = list.get(0).getClass();
@@ -94,9 +82,4 @@ public class Eaos {
 		return new ArrayList<>();
 	}
 
-	public static String getClassId(Entity owner) {
-		EntityAccessObject eao = Eaos.getEao(owner.getClass());
-		return eao.getEntityModel().getClassId();
-	}
-	
 }

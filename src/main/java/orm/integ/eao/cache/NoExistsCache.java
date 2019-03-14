@@ -24,16 +24,23 @@ public class NoExistsCache implements DataChangeListener {
 		neid.addCheck();
 	}
 	
+	public void signExists(Object id) {
+		if (id!=null) {
+			notExistIds.remove(id.toString());
+		}
+	}
+	
 	public boolean isNotExistId(Object id) {
 		NotExistId neid = notExistIds.get(id.toString());
 		if (neid==null) {
 			return false;
 		}
-		long timeDis = System.currentTimeMillis()-neid.getLastCheckTime();
-		if (timeDis>60000) {
-			return false;
-		}
-		return neid.getCheckTimes()>1;
+//		long timeDis = System.currentTimeMillis()-neid.getLastCheckTime();
+//		if (timeDis>60000) {
+//			this.removeNotExist(id);
+//			return false;
+//		}
+		return neid.getCheckTimes()>0;
 	}
 	
 	public void removeNotExist(Object id) {

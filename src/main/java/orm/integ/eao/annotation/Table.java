@@ -5,12 +5,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import orm.integ.eao.model.Entity;
-
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface ForeignKey {
+@Target(ElementType.TYPE)
+public @interface Table {
 	
-	Class<? extends Entity> masterClass(); 
+	String name();
 	
+	String schema() default "";
+	
+	int keyLength() default 12;
+
 }

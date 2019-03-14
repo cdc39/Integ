@@ -44,8 +44,6 @@ public abstract class EntityAccessService<T extends Entity> {
 	protected abstract void fillExtendFields(T entity) ;
 	
 	
-
-	
 	public EntityAccessObject<T> getEao() {
 		return eao;
 	}

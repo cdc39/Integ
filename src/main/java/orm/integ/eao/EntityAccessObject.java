@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -171,8 +172,10 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	}
 	
 	protected void putToCache(T entity) {
-		cache.put(entity);
-		service.fillExtendFields(entity);
+		if (entity!=null) {
+			cache.put(entity);
+			service.fillExtendFields(entity);
+		}
 	}
 
 	public List<T> getAll(int maxReturn) {
@@ -231,8 +234,9 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 			}
 		}
 		dao.insert(em.getTableName(), colValues);
+		notExistsCache.signExists(entity.getId());
 		putToCache(entity);
-		
+
 		service.afterChange0(ChangeFactory.newInsert(entity));
 	}
 	
@@ -260,7 +264,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	@Override
 	public void deleteById(Object id) {
 		T entity = this.getById(id);
-		if (em.entityAnno().checkIdUseOutsideBeforeDelete()) {
+		if (em.needForeignUseCheckOnDelete()) {
 			testForienUseBeforeDelete(id);
 		}
 		dao.deleteById(em.getFullTableName(), em.getKeyColumn(), id);
@@ -451,25 +455,33 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return toRecord(entity, em.getDetailFields());
 	}
 	
+	Map<Class<? extends Entity>, Set<Object>> getForeignIds(List<T> list) {
+		Map<Class<? extends Entity>, Set<Object>> foreignIds = new HashMap<>();
+		Set<Object> ids, idsAll = new HashSet<>();
+		for (FieldInfo fi: em.getFields()) {
+			ids = getValueSet(list, fi.getName());
+			idsAll = foreignIds.get(fi.getMasterClass());
+			if (idsAll==null) {
+				idsAll = new HashSet<>();
+				foreignIds.put(fi.getMasterClass(), idsAll);
+			}
+			idsAll.addAll(ids);
+		}
+		return foreignIds;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	void batchLoadRelEntities(List<T> list, String[] fields) {
-		FieldInfo fi;
-		FieldInfo foreignKeyField;
 		EntityAccessObject relEao ;
 		Set<Object> ids;
-		for (String field: fields) {
-			fi = em.getFieldInfo(field);
-			if (fi!=null && fi.isMapping()) {
-				foreignKeyField = em.getFieldInfo(fi.getMapping().getForeignKeyField());
-				if (foreignKeyField!=null) {
-					relEao = Eaos.getEao(foreignKeyField.getMasterClass());
-					if (relEao!=null) {
-						ids = getValueSet(list, foreignKeyField.getName());
-						relEao.getByIds(ids);
-					}
-				}
+		Map<Class<? extends Entity>, Set<Object>> foreignIds = getForeignIds(list);
+		for (Class clazz: foreignIds.keySet()) {
+			relEao = Eaos.getEao(clazz);
+			if (relEao!=null) {
+				ids = foreignIds.get(clazz);
+				relEao.getByIds(ids);
 			}
- 		}
+		}
 	}
 	
 	public List<Record> toRecords(List<T> list) {

@@ -7,7 +7,7 @@ public interface EntityConfig {
 	public void setNameMapping(String fieldName, String foreignKeyField);
 	public void setListFields(String... fields) ;
 	public void setDetailFields(String... fields) ;
-	public void setListFieldExcept(String... fields);
 	public void setDetailFieldExcept(String... fields);
+	public void setForeignUseCheckOnDelete(boolean needCheck);
 	
 }
