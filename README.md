@@ -1,4 +1,4 @@
-# 简洁完整的新一代Java持久层框架：Integ ORM
+# 简单又好用的新一代Java持久层框架：Integ ORM
 
 ## Integ ORM简介
 
