@@ -1,11 +1,13 @@
 package orm.integ.test.entity;
 
+import orm.integ.eao.annotation.Table;
 import orm.integ.eao.model.Entity;
-import orm.integ.eao.model.EntityAnno;
 
-@EntityAnno(classId="scls", table="tb_school_class")
+@Table(name="tb_school_class")
 public class SchoolClass extends Entity {
 
+	private String name;
+	
 	private int grade;  // 年级
 
 	public int getGrade() { 
@@ -14,6 +16,14 @@ public class SchoolClass extends Entity {
 
 	public void setGrade(int grade) {
 		this.grade = grade;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 }

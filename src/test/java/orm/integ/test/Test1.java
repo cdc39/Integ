@@ -85,8 +85,8 @@ public class Test1 {
 		
 		s1 = eao.getById("s1");
 		Record rec = eao.toRecord(s1, new String[]{"id","name","className","age"});
-		String className = rec.get("className");
-		String age = rec.get("age");
+		String className = rec.getString("className");
+		String age = rec.getString("age");
 		Assert.assertEquals("1班", className);
 		Assert.assertNotNull(age);
 		

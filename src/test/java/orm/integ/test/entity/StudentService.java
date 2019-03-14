@@ -22,7 +22,7 @@ public class StudentService extends EntityAccessService<Student> {
 	
 	@Override
 	public void setEntityConfig(EntityConfig config) {
-		config.addNameMapping("className", "schoolClassId");
+		config.setNameMapping("className", "schoolClassId");
 	}
 	
 	public void tran1() {

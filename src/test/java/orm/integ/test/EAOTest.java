@@ -29,6 +29,7 @@ public class EAOTest {
 	
 	@BeforeClass
 	public static void beforeAll() {
+		
 		Log4jHelper.initLogger();
 		studentService = new StudentService();
 		classService = new SchoolClassService();
@@ -63,8 +64,8 @@ public class EAOTest {
 		s1 = studentEao.getById("s1");
 		String[] fields = new String[]{"id","name","className","age"};
 		Record rec = studentEao.toRecord(s1, fields);
-		String className = rec.get("className");
-		String age = rec.get("age");
+		String className = rec.getString("className");
+		String age = rec.getString("age");
 		
 		Assert.assertEquals("1班", className);
 		Assert.assertNotNull(age);

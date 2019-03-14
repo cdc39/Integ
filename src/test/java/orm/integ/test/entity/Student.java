@@ -2,12 +2,14 @@ package orm.integ.test.entity;
 
 import java.util.Date;
 
+import orm.integ.eao.annotation.Table;
+import orm.integ.eao.annotation.ForeignKey;
 import orm.integ.eao.model.Entity;
-import orm.integ.eao.model.EntityAnno;
-import orm.integ.eao.model.ForeignKey;
 
-@EntityAnno(classId="stud", table="tb_student", schema="")
+@Table( name="tb_student")
 public class Student extends Entity {
+	
+	private String name;
 
 	private Integer sex;
 	
@@ -58,6 +60,14 @@ public class Student extends Entity {
 
 	public void setAge(int age) {
 		this.age = age;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
