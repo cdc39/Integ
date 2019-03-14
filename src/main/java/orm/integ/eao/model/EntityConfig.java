@@ -8,6 +8,5 @@ public interface EntityConfig {
 	public void setListFields(String... fields) ;
 	public void setDetailFields(String... fields) ;
 	public void setDetailFieldExcept(String... fields);
-	public void setForeignUseCheckOnDelete(boolean needCheck);
 	
 }

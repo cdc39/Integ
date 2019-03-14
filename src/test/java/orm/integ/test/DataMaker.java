@@ -20,10 +20,9 @@ public class DataMaker {
 		
 		createSchoolClasses(classCount);
 		
-		EntityAccessObject<Student> eao = 
-				new EntityAccessObject<Student>(new StudentService());
+		EntityAccessObject<Student> eao = new StudentService().getEao();
 		
-		eao.deleteAll();
+		eao.delete("", null, false);
 		
 		TimeMonitor tm = new TimeMonitor("createStudents");
 		Student stu;
@@ -42,9 +41,10 @@ public class DataMaker {
 	}
 	
 	static void createSchoolClasses(int count) {
-		EntityAccessObject<SchoolClass> eao = 
-				new EntityAccessObject<SchoolClass>(new SchoolClassService());
-		eao.deleteAll();
+		
+		EntityAccessObject<SchoolClass> eao = new SchoolClassService().getEao();
+
+		eao.delete("", null, false);
 		
 		SchoolClass sc;
 		double classNumPerGrade = count/6.0;

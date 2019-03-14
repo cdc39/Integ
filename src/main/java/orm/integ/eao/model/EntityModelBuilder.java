@@ -36,8 +36,6 @@ public class EntityModelBuilder implements EntityConfig {
 	private String[] defaultListFields ;
 	private String[] defaultDetailFields;
 	
-	boolean foreignUseCheckOnDelete = true;
-	
 	private Map<String, FieldInfo> fieldInfos = new HashMap<>();
 	
 	private Set<String> detailExceptFields = new HashSet<>();
@@ -117,7 +115,6 @@ public class EntityModelBuilder implements EntityConfig {
 		model.fullTableName = fullTableName;
 		model.keyColumn = keyColumn;
 		model.tableColumns = tableColumns.toArray(new ColumnInfo[0]);
-		model.foreignUseCheckOnDelete = foreignUseCheckOnDelete;
 		
 		List<String> fieldNames = getAllFieldName();
 		
@@ -286,9 +283,4 @@ public class EntityModelBuilder implements EntityConfig {
 		}
 	}
 
-	@Override
-	public void setForeignUseCheckOnDelete(boolean needCheck) {
-		this.foreignUseCheckOnDelete = needCheck;
-	}
-	
 }

@@ -80,7 +80,7 @@ public abstract class EntityAccessService<T extends Entity> {
 		public void rollback(DataChange change) {
 			if (change.getType()==ChangeTypes.INSERT) {
 				T entity = (T)change.getAfter();
-				eao.deleteById(entity.getId());
+				eao.deleteById(entity.getId(), false);
 			}
 			else if (change.getType()==ChangeTypes.DELETE) {
 				T entity = (T)change.getAfter();

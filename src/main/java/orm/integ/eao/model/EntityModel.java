@@ -23,7 +23,6 @@ public class EntityModel implements TableInfo {
 	String[] listFields;
 	String[] detailFields;
 	String[] noFieldColumns;
-	boolean foreignUseCheckOnDelete;
 	
 	FieldInfo[] fields;
 	Map<String, FieldInfo> fieldMap = new HashMap<>();
@@ -124,10 +123,6 @@ public class EntityModel implements TableInfo {
 	
 	public String[] getNoFieldColumns() {
 		return noFieldColumns;
-	}
-	
-	public boolean needForeignUseCheckOnDelete() {
-		return foreignUseCheckOnDelete;
 	}
 	
 	private String[] notEmptyFields(String[] fields) {

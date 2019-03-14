@@ -74,7 +74,7 @@ public class Test1 {
 	
 	static void test2(EntityAccessObject<Student> eao) {
 		
-		eao.deleteById("s1");
+		eao.deleteById("s1", true);
 		
 		Student s1 = new Student();
 		s1.setId("s1");
@@ -94,7 +94,7 @@ public class Test1 {
 	
 	static void test1(EntityAccessObject<Student> eao) {
 		
-		eao.deleteById("s1");
+		eao.deleteById("s1", true);
 		
 		Student s1 = new Student();
 		s1.setId("s1");

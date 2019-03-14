@@ -41,7 +41,7 @@ import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
 
-public class EntityAccessObject<T extends Entity> implements IEntityAccessObject<T> {
+public class EntityAccessObject<T extends Entity> {
 
 	public static int queryByIdsCount = 0;
 	
@@ -121,7 +121,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		}
 	}
 
-	@Override
 	public T getById(Object id) {
 		if (id==null) {
 			return null;
@@ -148,7 +147,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Override
 	public List<T> getByIds(Collection ids) {
 		LinkedHashSet set = new LinkedHashSet();
 		T en;
@@ -213,7 +211,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	}
 	
 	@SuppressWarnings("rawtypes")
-	@Override
 	public void insert(T entity) {
 		String keyValue = entity.getId();
 		if (keyValue==null) {
@@ -257,17 +254,15 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return newId;
 	}
 	
-	@Override
 	public int queryCount(String whereStmt, Object... values) {
 		TabQuery tq = new TabQuery(em);
 		tq.addWhereItem(whereStmt, values);
 		return queryManager.queryCount(tq);
 	}
 	
-	@Override
-	public void deleteById(Object id) {
+	public void deleteById(Object id, boolean checkForeignUse) {
 		T entity = this.getById(id);
-		if (em.needForeignUseCheckOnDelete()) {
+		if (checkForeignUse) {
 			testForienUseBeforeDelete(id);
 		}
 		DataChange change = ChangeFactory.newDelete(entity);
@@ -350,7 +345,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		update(entity, fieldNames.split(","));
 	}
 	
-	@Override
 	public void update(T entity, String[] fieldNames) {
 		if (entity==null || fieldNames==null || fieldNames.length==0) {
 			if (entity==null) {
@@ -388,7 +382,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override
 	public List<T> query(QueryRequest req) {
 		req.setTableInfo(em);
 		if (req.getLast()<=QueryRequest.PAGE_QUERY_MAX_RETURN) {
@@ -417,7 +410,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return list;
 	}
 	
-	@Override
 	public PageData pageQuery(QueryRequest req) {
 		req.setTableInfo(em);
 		List<String> ids = queryManager.queryIdList(req);
@@ -433,9 +425,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return new PageData(viewList, count);
 	}
 	
-	
-	
-	@Override
 	public Record toRecord(T entity, String[] viewFields) {
 		Object value;
 		Record record = new Record();
@@ -487,10 +476,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		return toRecords(list, em.getListFields());
 	}
 	
-	@Override
 	public List<Record> toRecords(List<T> list, String[] fields) {
-		
-		// 批量加载关联实体对象
 		
 		batchLoadRelEntities(list, fields);
 		
@@ -568,4 +554,21 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		}
 	}
 
+	public void delete(String where, Object[] values, boolean checkForeignUse) {
+		TabQuery query = new TabQuery(em);
+		query.addWhereItem(where, values);
+		if (!checkForeignUse) {
+			dao.delete(query);
+		}
+		else {
+			List<String> ids = queryManager.queryIdList(query);
+			for (String id: ids) {
+				testForienUseBeforeDelete(id);
+			}
+			for(String id: ids) {
+				deleteById(id, false);
+			}
+		}
+	}
+	
 }

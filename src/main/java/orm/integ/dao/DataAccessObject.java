@@ -483,11 +483,16 @@ public class DataAccessObject {
 		String sql = "update "+req.getTableName()+" set "+ setStmt+whereStmt;
 		return executeSql(sql, req.getValues());
 	}
+	
+	public void delete(TabQuery query) {
+		String whereStmt = query.getWhere().toString();
+		String sql = "delete from "+query.getTableName()+" "+whereStmt;
+		executeSql(sql, query.getValues());
+	}
 
 	public boolean isNull(String s) {
 		return s==null||s.trim().equals("");
 	}
-
 
 	
 }

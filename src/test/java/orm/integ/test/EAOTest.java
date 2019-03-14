@@ -36,7 +36,7 @@ public class EAOTest {
 		
 		studentEao = studentService.getEao();
 		
-		classService.getEao().deleteAll();
+		classService.getEao().delete("", null, false);
 		
 		SchoolClass sc = new SchoolClass();
 		sc.setId(1);
@@ -48,7 +48,7 @@ public class EAOTest {
 	
 	@Before
 	public void before() {
-		studentService.getEao().deleteAll();
+		studentService.getEao().delete("", null, false);
 	}
 	
 	@Test
@@ -92,7 +92,7 @@ public class EAOTest {
 		
 		Assert.assertEquals(s2.getName(), "小华");
 		
-		studentEao.deleteById(id);
+		studentEao.deleteById(id, true);
 		Student s4 = studentEao.getById(id);
 		Assert.assertNull(s4);
 		
