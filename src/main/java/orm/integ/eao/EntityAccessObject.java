@@ -35,6 +35,7 @@ import orm.integ.eao.model.ForeignUse;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
 import orm.integ.eao.transaction.ChangeFactory;
+import orm.integ.eao.transaction.DataChange;
 import orm.integ.eao.transaction.FieldChange;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
@@ -201,6 +202,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 	
 	public T queryFirst(String where, String order, Object... values) {
 		TabQuery req = new TabQuery();
+		req.setPageInfo(1, 1);
 		req.addWhereItem(where, values);
 		req.setOrder(order);
 		return queryFirst(req);
@@ -233,11 +235,12 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 				}
 			}
 		}
+		DataChange change = ChangeFactory.newInsert(entity);
+		service.beforeDataChange(change);
 		dao.insert(em.getTableName(), colValues);
 		notExistsCache.signExists(entity.getId());
 		putToCache(entity);
-
-		service.afterChange0(ChangeFactory.newInsert(entity));
+		service.afterDataChange(change);
 	}
 	
 	protected String createNewIdNoRepeat() {
@@ -267,8 +270,10 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		if (em.needForeignUseCheckOnDelete()) {
 			testForienUseBeforeDelete(id);
 		}
+		DataChange change = ChangeFactory.newDelete(entity);
+		service.beforeDataChange(change);
 		dao.deleteById(em.getFullTableName(), em.getKeyColumn(), id);
-		service.afterChange0(ChangeFactory.newDelete(entity));
+		service.afterDataChange(change);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -326,14 +331,6 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 		
 	}
 	
-	public void deleteAll() {
-		String sql = "delete from "+em.getTableName();
-		dao.executeSql(sql);
-		cache.clear();
-	}
-	
-	
-	
 	public void update(T after) {
 		T before = this.load(after.getId());
 		if (before==null) {
@@ -361,6 +358,7 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 			}
 			return ;
 		}
+		T old = load(entity.getId());
 		String fieldName, colName;
 		Object value;
 		FieldInfo field;
@@ -382,10 +380,11 @@ public class EntityAccessObject<T extends Entity> implements IEntityAccessObject
 			return;
 		}
 		StatementAndValue where = new StatementAndValue(em.getKeyColumn()+"=?", entity.getId());
+		DataChange change = ChangeFactory.newUpdate(old, entity);
+		service.beforeDataChange(change);
 		dao.update(em.getTableName(), updateFields, where);
 		service.fillExtendFields(entity);
-		T old = load(entity.getId());
-		service.afterChange0(ChangeFactory.newUpdate(old, entity));
+		service.afterDataChange(change);
 	}
 	
 	@SuppressWarnings("unchecked")

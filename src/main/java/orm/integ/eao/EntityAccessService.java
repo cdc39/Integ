@@ -32,10 +32,7 @@ public abstract class EntityAccessService<T extends Entity> {
 		}
 	}
 	
-	public Object createNewId() {
-		int keyLength = em.entityAnno().keyLength();
-		return IdGenerator.createRandomStr(keyLength, false);
-	}
+
 
 	protected abstract DataAccessObject getDao();
 	
@@ -43,6 +40,7 @@ public abstract class EntityAccessService<T extends Entity> {
 	
 	protected abstract void fillExtendFields(T entity) ;
 	
+	protected void beforeDataChange(DataChange change) {};
 	
 	public EntityAccessObject<T> getEao() {
 		return eao;
@@ -50,6 +48,11 @@ public abstract class EntityAccessService<T extends Entity> {
 
 	public EntityModel getEntityModel() {
 		return em;
+	}
+	
+	public Object createNewId() {
+		int keyLength = em.entityAnno().keyLength();
+		return IdGenerator.createRandomStr(keyLength, false);
 	}
 
 	public void addDataChangeListener(DataChangeListener listener) {
@@ -108,7 +111,7 @@ public abstract class EntityAccessService<T extends Entity> {
 		}
 	}
 	
-	void afterChange0(DataChange change) {
+	void afterDataChange(DataChange change) {
 		Transaction tran = TransactionManager.getTran();
 		if (tran==null) {
 			for (DataChangeListener ob:dataChangeListeners) {
