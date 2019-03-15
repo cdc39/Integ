@@ -13,9 +13,6 @@ public abstract class Transaction {
 	public static final int STATE_ROLLBACKING = 3;
 	public static final int STATE_ROLLBACKED = 4;
 	
-	
-	public abstract List<DataChangeListener> getDataChangeListeners();
-	
 	public abstract void onBegin() ;
 	
 	public abstract void rollback(DataChange change) ;
@@ -25,7 +22,6 @@ public abstract class Transaction {
 	public abstract void onFinally() ;
 	
 	public Transaction() {
-		observers = this.getDataChangeListeners();
 		state = STATE_BEGIN;
 		beginTime = new Timestamp(System.currentTimeMillis());
 		this.onBegin();
@@ -37,8 +33,6 @@ public abstract class Transaction {
 	
 	private final List<DataChange> changes = new ArrayList<>();
 
-	private final List<DataChangeListener> observers;
-	
 	public List<DataChange> getChanges() {
 		return changes;
 	}
@@ -46,12 +40,15 @@ public abstract class Transaction {
 	public void commit() {
 		this.onCommit();
 		this.state = STATE_COMMITED;
-		for (DataChangeListener ob: observers) {
-			for (DataChange change: changes) {
-				ob.notifyChange(change);
+		List<DataChangeListener> listeners;
+		for (DataChange change: changes) {
+			listeners = change.dataChangeListeners;
+			if (listeners!=null) {
+				for (DataChangeListener ob: listeners) {
+					ob.notifyChange(change);
+				}
 			}
 		}
-		this.onFinally();
 	}
 	
 	public int getState() {
@@ -66,7 +63,6 @@ public abstract class Transaction {
 			rollback(change);
 		}
 		this.state = STATE_ROLLBACKED;
-		this.onFinally();
 	}
 	
 

@@ -55,5 +55,13 @@ public class ChangeFactory {
 		}
 		return changes;
 	}
+
+	@SuppressWarnings("rawtypes")
+	public static DataChange newDeleteBatch(List list) {
+		DataChange change = new DataChange();
+		change.type = ChangeTypes.BATCH_DELETE;
+		change.list = list;
+		return change;
+	}
 	
 }

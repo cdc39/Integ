@@ -1,7 +1,12 @@
 package orm.integ.eao.transaction;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import orm.integ.utils.ClassAnalyzer;
+import orm.integ.utils.IntegError;
 
 public class TransactionManager {
 
@@ -24,6 +29,42 @@ public class TransactionManager {
 	
 	public static long getThreadId() {
 		return Thread.currentThread().getId();
+	}
+
+	public static void executeTransaction(Object service, String methodName, Object...values) {
+		Method method = ClassAnalyzer.get(service).getMethod(methodName);
+		Transaction tran = new EntityTransaction();
+		putTran(tran);
+		try {
+			method.invoke(service, values);
+			tran.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			tran.rollback();
+		}
+		finally {
+			tran.onFinally();
+			removeTran();
+		}
+	}
+
+	public static void afterChange(DataChange change, List<DataChangeListener> dataChangeListeners) {
+		Transaction tran = TransactionManager.getTran();
+		if (tran==null) {
+			for (DataChangeListener ob: dataChangeListeners) {
+				ob.notifyChange(change);
+			}
+			return;
+		}
+		change.dataChangeListeners = dataChangeListeners;
+		if (tran.running()) {
+			tran.addChange(change);
+		}
+		else if (tran.rollbacking()) {
+		}
+		else {
+			throw new IntegError("事务状态异常");
+		}				
 	}
 	
 }

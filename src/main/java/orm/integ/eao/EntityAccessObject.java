@@ -36,7 +36,9 @@ import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.DataChange;
+import orm.integ.eao.transaction.DataChangeListener;
 import orm.integ.eao.transaction.FieldChange;
+import orm.integ.eao.transaction.TransactionManager;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
@@ -49,29 +51,30 @@ public class EntityAccessObject<T extends Entity> {
 	private EntityModel em;
 	private final Class<T> entityClass;
 	private final RowMapper rowMapper;
-	private final EntityAccessService<T> service;
+	private final EaoAdapter<T> adapter;
 	private final MemoryCache<T> cache = new MemoryCache<>();
 	private final NoExistsCache notExistsCache = new NoExistsCache();
 	private final QueryManager<T> queryManager ;
-
+	private final List<DataChangeListener> dataChangeListeners = new ArrayList<>();
+	
 	@SuppressWarnings("unchecked")
-	public EntityAccessObject(EntityAccessService<T> service) {
+	public EntityAccessObject(EaoAdapter<T> adapter) {
 		
-		this.service = service;
-		this.dao = service.getDao();
-        Type t = service.getClass().getGenericSuperclass();
+		this.adapter = adapter;
+		this.dao = adapter.getDao();
+        Type t = adapter.getClass().getGenericSuperclass();
         Type[] ts = ((ParameterizedType) t).getActualTypeArguments();
 		this.entityClass = (Class<T>)ts[0];
 		
 		EntityModelBuilder emBuilder = new EntityModelBuilder(entityClass, dao);
-		service.setEntityConfig(emBuilder);
+		adapter.setEntityConfig(emBuilder);
 		em = emBuilder.buildModel();
 		
 		queryManager = new QueryManager<T>(dao);
 		
-		service.addDataChangeListener(cache);
-		service.addDataChangeListener(queryManager);
-		service.addDataChangeListener(notExistsCache);
+		dataChangeListeners.add(cache);
+		dataChangeListeners.add(queryManager);
+		dataChangeListeners.add(notExistsCache);
 		
 		Eaos.addEao(this);
 		
@@ -102,6 +105,10 @@ public class EntityAccessObject<T extends Entity> {
 	
 	public QueryManager<T> getQueryManager() {
 		return this.queryManager;
+	}
+	
+	public DataChangeListener[] getDataChangeListeners() {
+		return dataChangeListeners.toArray(new DataChangeListener[0]);
 	}
 	
 	private void fillFieldValues(T entity, ResultSet rset) throws Exception  {
@@ -173,7 +180,7 @@ public class EntityAccessObject<T extends Entity> {
 	protected void putToCache(T entity) {
 		if (entity!=null) {
 			cache.put(entity);
-			service.fillExtendFields(entity);
+			adapter.fillExtendFields(entity);
 		}
 	}
 
@@ -233,18 +240,18 @@ public class EntityAccessObject<T extends Entity> {
 			}
 		}
 		DataChange change = ChangeFactory.newInsert(entity);
-		service.beforeDataChange(change);
+		adapter.beforeChange(change);
 		dao.insert(em.getTableName(), colValues);
-		notExistsCache.signExists(entity.getId());
+		afterChange(change);
 		putToCache(entity);
-		service.afterDataChange(change);
+		adapter.afterChange(change);
 	}
 	
 	protected String createNewIdNoRepeat() {
 		String newId;
 		int testCount = 0, count;
 		do {
-			newId = service.createNewId().toString();
+			newId = adapter.createNewId().toString();
 			count = queryCount(em.getKeyColumn()+"=?", newId);
 			testCount++;
 		} while (count>0 && testCount<10);
@@ -266,9 +273,14 @@ public class EntityAccessObject<T extends Entity> {
 			testForienUseBeforeDelete(id);
 		}
 		DataChange change = ChangeFactory.newDelete(entity);
-		service.beforeDataChange(change);
+		adapter.beforeChange(change);
 		dao.deleteById(em.getFullTableName(), em.getKeyColumn(), id);
-		service.afterDataChange(change);
+		afterChange(change);
+		adapter.afterChange(change);
+	}
+	
+	public void deleteById(Object id) {
+		deleteById(id, true);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -375,10 +387,11 @@ public class EntityAccessObject<T extends Entity> {
 		}
 		StatementAndValue where = new StatementAndValue(em.getKeyColumn()+"=?", entity.getId());
 		DataChange change = ChangeFactory.newUpdate(old, entity);
-		service.beforeDataChange(change);
+		adapter.beforeChange(change);
 		dao.update(em.getTableName(), updateFields, where);
-		service.fillExtendFields(entity);
-		service.afterDataChange(change);
+		afterChange(change);
+		adapter.fillExtendFields(entity);
+		adapter.afterChange(change);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -557,18 +570,28 @@ public class EntityAccessObject<T extends Entity> {
 	public void delete(String where, Object[] values, boolean checkForeignUse) {
 		TabQuery query = new TabQuery(em);
 		query.addWhereItem(where, values);
-		if (!checkForeignUse) {
-			dao.delete(query);
-		}
-		else {
-			List<String> ids = queryManager.queryIdList(query);
+		queryManager.clear();
+		List<String> ids = queryManager.queryIdList(query);
+		List<T> list = query(query);
+		if (checkForeignUse) {
 			for (String id: ids) {
 				testForienUseBeforeDelete(id);
 			}
-			for(String id: ids) {
-				deleteById(id, false);
+		}
+		dao.delete(query);
+		afterChange(ChangeFactory.newDeleteBatch(list));
+	}
+	
+	public void batchInsert(List<T> list) {
+		if (list!=null) {
+			for (T entity:list) {
+				this.insert(entity);
 			}
 		}
 	}
 	
+	private void afterChange(DataChange change) {
+		TransactionManager.afterChange(change, dataChangeListeners);
+	}
+
 }

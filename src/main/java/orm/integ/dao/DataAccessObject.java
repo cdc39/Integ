@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -327,6 +328,11 @@ public class DataAccessObject {
 		return jdbcTemplate.queryForObject(sql, args, rowMapper);
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<ListOrderedMap> queryForList(String sql, Object... values) {
+		return jdbcTemplate.queryForList(sql, values); 
+	}
+	
 	public List query(QueryRequest request, RowMapper rowMapper) {
 		String sql = dialect.makePageQuerySql(request);
 		return this.query(sql, request.getValues(), rowMapper);

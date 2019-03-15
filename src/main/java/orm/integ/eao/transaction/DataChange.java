@@ -13,7 +13,12 @@ public class DataChange {
 
 	Entity after;
 	
+	@SuppressWarnings("rawtypes")
+	List list;
+	
 	List<FieldChange> fieldChanges;
+	
+	List<DataChangeListener> dataChangeListeners;
 	
 	public int getType() {
 		return type;
@@ -32,9 +37,13 @@ public class DataChange {
 		if (after!=null) {
 			return (E) after;
 		}
-		else {
+		else if (before!=null){
 			return (E) before;
 		}
+		else if (list!=null && list.size()>0) {
+			return (E) list.get(0);
+		}
+		return null;
 	}
 
 	public String[] getChangedFields() {
@@ -63,6 +72,11 @@ public class DataChange {
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public List getList() {
+		return list;
 	}
 
 }

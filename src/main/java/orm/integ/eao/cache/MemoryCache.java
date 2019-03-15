@@ -1,5 +1,6 @@
 package orm.integ.eao.cache;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,5 +45,10 @@ public class MemoryCache<T extends Entity> extends EntityCache<T> {
 		data.clear();
 	}
 
+	public void batchRemove(List<String> ids) {
+		for (String id: ids) {
+			this.remove(id);
+		}
+	}
 
 }

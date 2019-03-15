@@ -77,14 +77,13 @@ public class EntityModelBuilder implements EntityConfig {
 			fi = new FieldInfo(entityClass, field);
 			f = ca.getField(field);
 			fi.field = f;
+			fi.setter = ca.getSetterMethod(f);
+			fi.getter = ca.getGetterMethod(field);
 			fk = f.getAnnotation(ForeignKey.class);
 			if (fk!=null) {
 				fi.masterClass = fk.masterClass();
 			}
-			fi.setter = ca.getSetterMethod(f);
-			fi.getter = ca.getGetterMethod(field);
 			fieldInfos.put(field, fi);
-
 			colName = StringUtils.hump2underline(field);
 			setFieldColumn(field, colName);
 		}

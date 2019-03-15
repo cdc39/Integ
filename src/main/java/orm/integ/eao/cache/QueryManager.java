@@ -118,5 +118,10 @@ public class QueryManager<T extends Entity> implements DataChangeListener {
 		System.out.println("countQueryCount="+countQueryCount+", countQueryCacheHitCount="+countQueryCacheHitCount);
 		
 	}
+
+	public void clear() {
+		this.idQueryCaches.clear();
+		this.countQueryCaches.clear();
+	}
 	
 }
