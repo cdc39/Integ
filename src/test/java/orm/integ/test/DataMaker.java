@@ -3,11 +3,11 @@ package orm.integ.test;
 import java.util.Random;
 
 import orm.integ.eao.EntityAccessObject;
-import orm.integ.eao.IdGenerator;
 import orm.integ.test.entity.SchoolClass;
 import orm.integ.test.entity.SchoolClassService;
 import orm.integ.test.entity.Student;
 import orm.integ.test.entity.StudentService;
+import orm.integ.utils.IdGenerator;
 
 public class DataMaker {
 

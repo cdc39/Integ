@@ -5,9 +5,9 @@ import java.util.Date;
 
 import orm.integ.dao.DataAccessObject;
 import orm.integ.eao.EntityAccessService;
-import orm.integ.eao.IdGenerator;
 import orm.integ.eao.model.EntityConfig;
 import orm.integ.test.DaoUtil;
+import orm.integ.utils.IdGenerator;
 
 public class StudentService extends EntityAccessService<Student> {
 	

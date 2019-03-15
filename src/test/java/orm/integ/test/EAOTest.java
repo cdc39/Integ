@@ -11,7 +11,6 @@ import org.junit.Test;
 import orm.integ.dao.sql.SqlQuery;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.eao.EntityAccessObject;
-import orm.integ.eao.IdGenerator;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
 import orm.integ.test.entity.SchoolClass;
@@ -19,6 +18,7 @@ import orm.integ.test.entity.SchoolClassService;
 import orm.integ.test.entity.Student;
 import orm.integ.test.entity.StudentService;
 import orm.integ.utils.Convertor;
+import orm.integ.utils.IdGenerator;
 
 
 public class EAOTest {
