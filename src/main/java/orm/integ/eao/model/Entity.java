@@ -7,6 +7,8 @@ public class Entity implements HasId {
 	protected String id;
 	
 	protected Date createTime; 
+	
+	byte fromOrm = 0;
 
 	public String getId() {
 		return id;

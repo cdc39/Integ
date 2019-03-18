@@ -28,6 +28,7 @@ import orm.integ.dao.sql.QueryRequest;
 import orm.integ.dao.sql.SqlBuilder;
 import orm.integ.dao.sql.StatementAndValue;
 import orm.integ.dao.sql.TabQuery;
+import orm.integ.dao.sql.Where;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.StringUtils;
@@ -142,8 +143,8 @@ public class DataAccessObject {
 	}
 
 	public int queryCount(String tableName, String whereStmt, Object... values) {
-		whereStmt = SqlBuilder.formatWhereStmt(whereStmt);
-		String sql = "select count(*) from "+tableName+whereStmt;
+		Where where = new Where(whereStmt, values);
+		String sql = "select count(*) from "+tableName+where.toString();
 		return queryForInt(sql, values);
 	}
 	
@@ -243,7 +244,7 @@ public class DataAccessObject {
 		if (values!=null&& values.length>0) {
 			sql = sql + "|" + StringUtils.link(values, ",");
 		}
-		log.info(sql);
+		log.debug(sql);
 	}
 	
 	private void printGetResult(int getRecordNum) {

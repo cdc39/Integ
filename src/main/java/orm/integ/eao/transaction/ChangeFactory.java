@@ -14,7 +14,7 @@ public class ChangeFactory {
 		dc.type = ChangeTypes.UPDATE;
 		dc.before = (before);
 		dc.after = after;
-		dc.fieldChanges = findDifferents(before, after);
+		//dc.fieldChanges = findDifferents(before, after);
 		return dc;
 	}
 	

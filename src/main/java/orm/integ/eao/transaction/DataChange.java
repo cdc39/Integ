@@ -1,6 +1,5 @@
 package orm.integ.eao.transaction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import orm.integ.eao.model.Entity;
@@ -16,7 +15,7 @@ public class DataChange {
 	@SuppressWarnings("rawtypes")
 	List list;
 	
-	List<FieldChange> fieldChanges;
+	private FieldChange[] fieldChanges;
 	
 	List<DataChangeListener> dataChangeListeners;
 	
@@ -46,23 +45,22 @@ public class DataChange {
 		return null;
 	}
 
-	public String[] getChangedFields() {
-		List<String> fields = new ArrayList<>();
-		for(FieldChange fc:fieldChanges) {
-			fields.add(fc.getFieldName());
-		}
-		return fields.toArray(new String[0]);
-	}
-	
 	public FieldChange[] getFieldChanges() {
-		return fieldChanges.toArray(new FieldChange[0]);
+		if (fieldChanges==null) {
+			List<FieldChange> diffes = ChangeFactory.findDifferents(before, after);
+			fieldChanges = diffes.toArray(new FieldChange[0]);
+		}
+		return fieldChanges;
 	}
 
-	public boolean containFields(String[] fields) {
+	public boolean containFields(String... fields) {
 		if (type==ChangeTypes.INSERT||type==ChangeTypes.DELETE) {
 			return true;
 		}
-		if (fieldChanges!=null) {
+		if (fields==null || fields.length==0) {
+			return false;
+		}
+		if (getFieldChanges()!=null) {
 			for (FieldChange fc: fieldChanges) {
 				for (String field: fields) {
 					if (fc.getFieldName().equals(field)) {

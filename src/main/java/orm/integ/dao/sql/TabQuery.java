@@ -2,7 +2,7 @@ package orm.integ.dao.sql;
 
 public class TabQuery extends QueryRequest {
 	
-	private WhereGroup where = new WhereGroup();
+	private Where where = new Where();
 	
 	public TabQuery() {
 	}
@@ -11,8 +11,12 @@ public class TabQuery extends QueryRequest {
 		this.setTableInfo(tab);
 	}
 
-	public WhereGroup getWhere() {
+	public Where getWhere() {
 		return where;
+	}
+	
+	public void setWhere(Where where) {
+		this.where = where;
 	}
 	
 	@Override

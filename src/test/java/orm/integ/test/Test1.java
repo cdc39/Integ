@@ -105,7 +105,7 @@ public class Test1 {
 		System.out.println("get student: name="+s2.getName());
 		
 		s2.setName("小华");
-		eao.update(s2, new String[]{"name"});
+		eao.update(s2);
 		
 	}
 	

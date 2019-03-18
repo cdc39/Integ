@@ -32,6 +32,7 @@ import orm.integ.eao.model.EntityModels;
 import orm.integ.eao.model.FieldInfo;
 import orm.integ.eao.model.FieldMapping;
 import orm.integ.eao.model.ForeignUse;
+import orm.integ.eao.model.FromOrmHelper;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
 import orm.integ.eao.transaction.ChangeFactory;
@@ -64,7 +65,8 @@ public class EntityAccessObject<T extends Entity> {
 		this.dao = adapter.getDao();
         Type t = adapter.getClass().getGenericSuperclass();
         Type[] ts = ((ParameterizedType) t).getActualTypeArguments();
-		this.entityClass = (Class<T>)ts[0];
+		entityClass = (Class<T>)ts[0];
+		
 		
 		EntityModelBuilder emBuilder = new EntityModelBuilder(entityClass, dao);
 		adapter.setEntityConfig(emBuilder);
@@ -150,6 +152,7 @@ public class EntityAccessObject<T extends Entity> {
 	@SuppressWarnings("unchecked")
 	public T load(Object id) {
 		T en = (T) dao.queryById(em.getFullTableName(), em.getKeyColumn(), id, rowMapper);
+		FromOrmHelper.setFromOrm(en);
 		return en;
 	}
 	
@@ -164,10 +167,11 @@ public class EntityAccessObject<T extends Entity> {
 			}
 		}
 		if (set.size()>0) {
-			List listNew = dao.queryByIds(em.getFullTableName(), em.getKeyColumn(), set.toArray(), rowMapper);
+			List<T> listNew = dao.queryByIds(em.getFullTableName(), em.getKeyColumn(), set.toArray(), rowMapper);
 			queryByIdsCount++;
-			for (Object obj: listNew) {
-				putToCache((T)obj);
+			for (T obj: listNew) {
+				FromOrmHelper.setFromOrm(obj);
+				putToCache(obj);
 			}
 		}
 		List<T> list = new ArrayList<>();
@@ -225,6 +229,9 @@ public class EntityAccessObject<T extends Entity> {
 			entity.setId(keyValue);
 		}
 		entity.setCreateTime(new Date());
+		DataChange change = ChangeFactory.newInsert(entity);
+		adapter.beforeChange(change);
+
 		FieldInfo[] fields = em.getFields();
 		Map<String, Object> colValues = new HashMap<>();
 		Object value;
@@ -239,9 +246,8 @@ public class EntityAccessObject<T extends Entity> {
 				}
 			}
 		}
-		DataChange change = ChangeFactory.newInsert(entity);
-		adapter.beforeChange(change);
 		dao.insert(em.getTableName(), colValues);
+		FromOrmHelper.setFromOrm(entity);
 		afterChange(change);
 		putToCache(entity);
 		adapter.afterChange(change);
@@ -338,62 +344,52 @@ public class EntityAccessObject<T extends Entity> {
 		
 	}
 	
-	public void update(T after) {
-		T before = this.load(after.getId());
+	public void update(T entity) {
+		if (entity==null) {
+			MyLogger.printError(new Throwable(), "entity is null!");
+			return;
+		}
+		if (!FromOrmHelper.isFromOrm(entity)) {
+			throw new IntegError("entity is not created by integ, can not be update.");
+		}
+		T before = this.load(entity.getId());
 		if (before==null) {
 			return;
 		}
-		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(before, after);
-		List<String> fields = new ArrayList<>();
-		for(FieldChange fc:fieldChanges) {
-			fields.add(fc.getFieldName());
-		}
-		if (fields.size()>0) {
-			update(after, fields.toArray(new String[0]));
-		}
-	}
-	
-	public void update(T entity, String fieldNames) {
-		update(entity, fieldNames.split(","));
-	}
-	
-	public void update(T entity, String[] fieldNames) {
-		if (entity==null || fieldNames==null || fieldNames.length==0) {
-			if (entity==null) {
-				MyLogger.printError(new Throwable(), "entity is null!");
-			}
-			return ;
-		}
 		T old = load(entity.getId());
-		String fieldName, colName;
-		Object value;
-		FieldInfo field;
-		Map<String, Object> updateFields = new HashMap<String, Object>();
-		for (int i=0; i<fieldNames.length; i++) {
-			fieldName = fieldNames[i].trim();
-			field = em.getFieldInfo(fieldName);
-			if (field==null) {
-				throw new IntegError(entityClass.getSimpleName()+"."+fieldName+" 属性不存在");
-			}
-			colName = field.getColumnName();
-			if(!field.columnExists()) {
-				throw new IntegError(fieldName+"->"+colName+" 字段不存在！");
-			}
-			value = field.getValue(entity);
-			updateFields.put(colName, value);
-		}
-		if (updateFields.size()==0) {
-			return;
-		}
-		StatementAndValue where = new StatementAndValue(em.getKeyColumn()+"=?", entity.getId());
 		DataChange change = ChangeFactory.newUpdate(old, entity);
 		adapter.beforeChange(change);
+
+		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(before, entity);
+		List<String> fields = new ArrayList<>();
+		String fieldName, colName;
+		Object value;
+		FieldInfo field ;
+		Map<String, Object> updateFields = new HashMap<String, Object>();
+
+		for(FieldChange fc:fieldChanges) {
+			fieldName = fc.getFieldName();
+			field = em.getFieldInfo(fieldName);
+			if (field!=null && field.columnExists()) {
+				fields.add(fieldName);
+				colName = field.getColumnName();
+				value = field.getValue(entity);
+				updateFields.put(colName, value);
+			}
+		}
+		if (updateFields.size()==0) {
+			return ;
+		}
+		
+		StatementAndValue where = new StatementAndValue(em.getKeyColumn()+"=?", entity.getId());
+		
 		dao.update(em.getTableName(), updateFields, where);
 		afterChange(change);
 		adapter.fillExtendFields(entity);
 		adapter.afterChange(change);
+		
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<T> query(QueryRequest req) {
 		req.setTableInfo(em);

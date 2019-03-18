@@ -7,7 +7,6 @@ import orm.integ.dao.sql.TabQuery;
 
 public class Oracle extends SqlBuilder {
 
-	
 	@Override
 	public String makePageQuerySql(QueryRequest req) {
 
@@ -29,8 +28,6 @@ public class Oracle extends SqlBuilder {
 		}
 		return sql + orderStmt;
 	}
-	
-
 	
 	@Override
 	public String getTestSql() {

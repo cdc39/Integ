@@ -88,7 +88,7 @@ public class EAOTest {
 		Assert.assertNotNull(s2);
 		
 		s2.setName("小华");
-		studentEao.update(s2, "name");
+		studentEao.update(s2);
 		
 		Assert.assertEquals(s2.getName(), "小华");
 		

@@ -59,6 +59,9 @@ public class ClassAnalyzer {
 			@Override
 			public boolean testField(Field field) {
 				int m = field.getModifiers();
+				if (field.getName().equals("fromOrm")) {
+					return false;
+				}
 				return !Modifier.isStatic(m) && isNormalDataType(field.getType());
 			}
 		});

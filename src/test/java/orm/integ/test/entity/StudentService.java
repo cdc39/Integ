@@ -30,7 +30,7 @@ public class StudentService extends EntityAccessService<Student> {
 		s.setName("张三");
 		eao.insert(s);
 		s.setName("李四");
-		eao.update(s, "name");
+		eao.update(s);
 		throw new RuntimeException("模拟发生错误");
 	}
 	

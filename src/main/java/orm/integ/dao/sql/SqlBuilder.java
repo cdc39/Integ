@@ -1,48 +1,7 @@
 package orm.integ.dao.sql;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import orm.integ.utils.StringUtils;
-
 public abstract class SqlBuilder {
 
-	
-	public static String formatWhereStmt(String whereStmt) {
-		if (isNull(whereStmt)) {
-			whereStmt = " ";
-		}
-		else {
-			if (whereStmt.toLowerCase().trim().indexOf("where")!=0) {
-				whereStmt = " where "+whereStmt;
-			}
-		}
-		return whereStmt;
-	}
-	
-	public static String formatWhereStmt(List<StatementAndValue> whereItems) {
-		String stmt = toWhereStatement(whereItems);
-		return formatWhereStmt(stmt);
-	}
-	
-	public static String toWhereStatement(List<StatementAndValue> whereItems) {
-		List<String> stmtList = new ArrayList<>();
-		if (whereItems.size()==1) {
-			return whereItems.get(0).getStatement();
-		}
-		else if (whereItems.size()==0) {
-			return "";
-		}
-		else {
-			for (StatementAndValue stmt: whereItems) {
-				if (!isNull(stmt.getStatement())) {
-					stmtList.add("("+stmt.getStatement()+")");
-				}
-			}
-			return StringUtils.link(stmtList, " and ");
-		}
-	}
-	
 	public SqlBuilder() {
 	}
 	

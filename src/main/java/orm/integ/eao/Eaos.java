@@ -82,4 +82,18 @@ public class Eaos {
 		return new ArrayList<>();
 	}
 
+	public static void insert(Entity entity) {
+		EntityAccessObject eao = getEao(entity);
+		if (eao!=null) {
+			eao.insert(entity);
+		}
+	}
+	
+	public static void update(Entity entity) {
+		EntityAccessObject eao = getEao(entity);
+		if (eao!=null) {
+			eao.update(entity);
+		}
+	}
+
 }

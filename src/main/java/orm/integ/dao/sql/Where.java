@@ -5,11 +5,20 @@ import java.util.List;
 
 import orm.integ.utils.StringUtils;
 
-public class WhereGroup {
+public class Where {
 
 	private List<StatementAndValue> whereItems = new ArrayList<>();
 	
 	private Object[] values;
+	
+	public Where() {
+	}
+	
+	public Where(String where, Object...values) {
+		if (!isNull(where)) {
+			this.addItem(new StatementAndValue(where, values));
+		}
+	}
 	
 	private void resetValues() {
 		List<Object> valueList = new ArrayList<>();
@@ -78,7 +87,7 @@ public class WhereGroup {
 		return s==null||s.trim().equals("");
 	}
 
-	public void copyFrom(WhereGroup where) {
+	public void copyFrom(Where where) {
 		this.whereItems.clear();
 		this.whereItems.addAll(where.whereItems);
 		this.resetValues();
