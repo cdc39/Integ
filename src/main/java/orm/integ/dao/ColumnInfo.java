@@ -16,7 +16,6 @@ public class ColumnInfo {
 	
 	private int displaySize;
 	
-
 	public String getName() {
 		return name;
 	}
@@ -72,6 +71,5 @@ public class ColumnInfo {
 	public void setDisplaySize(int displaySize) {
 		this.displaySize = displaySize;
 	}
-	
-	
+
 }

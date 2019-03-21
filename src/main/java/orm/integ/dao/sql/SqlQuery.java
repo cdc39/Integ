@@ -8,7 +8,12 @@ public class SqlQuery extends QueryRequest {
 		this.sql = sql;
 		this.values = values==null?new Object[]{}:values;
 	}
-
+	
+	public SqlQuery(StatementAndValue sql) {
+		this.sql = sql.getStatement();
+		this.values = sql.getValues();
+	}
+	
 	private final String sql;
 	
 	private Object[] values;

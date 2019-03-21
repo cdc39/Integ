@@ -9,12 +9,12 @@ import orm.integ.utils.MyLogger;
 
 public class FieldInfo {
 	
-	public FieldInfo(Class<? extends Entity> entityClass, String name) {
-		this.entityClass = entityClass;
+	public FieldInfo(Class<?> ownerClass, String name) {
 		this.name = name;
+		this.ownerClass = ownerClass;
 	}
 	
-	final Class<? extends Entity> entityClass;
+	final Class<?> ownerClass;
 	
 	final String name;
 	
@@ -96,8 +96,8 @@ public class FieldInfo {
 		return masterClass;
 	}
 	
-	public Class<? extends Entity> getEntityClass() {
-		return entityClass;
+	public Class<?> getOwnerClass() {
+		return ownerClass;
 	}
 	
 	public boolean isMapping() {

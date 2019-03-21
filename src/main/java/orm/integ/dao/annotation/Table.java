@@ -1,4 +1,4 @@
-package orm.integ.eao.annotation;
+package orm.integ.dao.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,4 +15,6 @@ public @interface Table {
 	
 	int keyLength() default 12;
 
+	String keyColumn() default "";
+	
 }

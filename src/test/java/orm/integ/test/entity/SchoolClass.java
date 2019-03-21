@@ -1,6 +1,6 @@
 package orm.integ.test.entity;
 
-import orm.integ.eao.annotation.Table;
+import orm.integ.dao.annotation.Table;
 import orm.integ.eao.model.Entity;
 
 @Table(name="tb_school_class")

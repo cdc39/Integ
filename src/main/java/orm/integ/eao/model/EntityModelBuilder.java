@@ -1,95 +1,47 @@
 package orm.integ.eao.model;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.DataAccessObject;
-import orm.integ.eao.annotation.ForeignKey;
-import orm.integ.eao.annotation.Table;
-import orm.integ.utils.ClassAnalyzer;
 import orm.integ.utils.IntegError;
-import orm.integ.utils.StringUtils;
 
-@SuppressWarnings("rawtypes")
-public class EntityModelBuilder implements EntityConfig {
+public class EntityModelBuilder extends TableModelBuilder implements EntityConfig {
 
-	private Table table;
-
-	private final Class<? extends Entity> entityClass;
-	private String tableName;
 	private String tableKeyName;
-	private String tableSchema;
-	private String fullTableName;
 	private String keyColumn;
-	//private String nameColumn;
-	private List<ColumnInfo> tableColumns ;
-	private String[] normalFields ;
 	private String[] defaultListFields ;
 	private String[] defaultDetailFields;
 	
-	private Map<String, FieldInfo> fieldInfos = new HashMap<>();
-	
 	private Set<String> detailExceptFields = new HashSet<>();
+	private Class<? extends Relation>[] relationClasses ;
+	private DataAccessObject dao;
 	
-	private EntityModel model;
-	
-	@SuppressWarnings("unchecked")
-	public EntityModelBuilder(Class entityClass, DataAccessObject dao) {
+	public EntityModelBuilder(Class<? extends Entity> entityClass, DataAccessObject dao) {
+		super(entityClass, dao);
 		
-		this.entityClass = entityClass;
-		table = (Table) entityClass.getAnnotation(Table.class);
-		
-		ClassAnalyzer ca = ClassAnalyzer.get(entityClass);
-		normalFields = ca.getNormalFields();
-		
-		tableName = table.name();
-		tableSchema = table.schema().trim();
-		fullTableName = tableName;
-		if (tableSchema.trim().length()>0) {
-			fullTableName = tableSchema+"."+tableName;
-		}
+		this.dao = dao;
 		
 		tableKeyName = getTableKeyName();
 		
-		String keyColumn = tableKeyName+"_id";
-		String nameColumn = tableKeyName+"_name";
-		
-		boolean exists = dao.tableExistTest(fullTableName);
-		if (!exists) {
-			throw new IntegError("table "+fullTableName+" not exists!");
+		keyColumn = table.keyColumn();
+		if (keyColumn.equals("")) {
+			keyColumn = tableKeyName+"_id"; 
 		}
-		this.tableColumns = dao.getTableColumns(fullTableName);  
 		
-		FieldInfo fi;
-		Field f;
-		String colName;
-		ForeignKey fk;
-		for (String field:normalFields) {
-			fi = new FieldInfo(entityClass, field);
-			f = ca.getField(field);
-			fi.field = f;
-			fi.setter = ca.getSetterMethod(f);
-			fi.getter = ca.getGetterMethod(field);
-			fk = f.getAnnotation(ForeignKey.class);
-			if (fk!=null) {
-				fi.masterClass = fk.masterClass();
-			}
-			fieldInfos.put(field, fi);
-			colName = StringUtils.hump2underline(field);
-			setFieldColumn(field, colName);
+		FieldInfo idField = fieldInfos.get("id");
+		if (idField.columnExists()) {
+			keyColumn = idField.columnName;
 		}
-		setFieldColumn("id", keyColumn);
-		setFieldColumn("name", nameColumn);
-
+		else {
+			setFieldColumn("id", keyColumn);
+		}
+		setFieldColumn("name", tableKeyName+"_name");
+		
 	}
 	
 	private String getTableKeyName() {
@@ -101,29 +53,16 @@ public class EntityModelBuilder implements EntityConfig {
 		return tableKeyName;
 	}
 	
+	
 	public EntityModel buildModel() {
 		
-		if (model==null) {
-			model = new EntityModel();
-		}
-		model.entityAnno = table;
-		model.entityClass = entityClass;
-		model.tableName = tableName;
+		EntityModel model = new EntityModel();
+		super.buildModel(model);
+		
 		model.tableKeyName = tableKeyName;
-		model.tableSchema = tableSchema;
-		model.fullTableName = fullTableName;
 		model.keyColumn = keyColumn;
-		model.tableColumns = tableColumns.toArray(new ColumnInfo[0]);
 		
 		List<String> fieldNames = getAllFieldName();
-		
-		int len = fieldNames.size();
-		FieldInfo[] fields = new FieldInfo[len];
-		for (int i=0; i<len; i++) {
-			fields[i] = fieldInfos.get(fieldNames.get(i));
-		}
-		
-		model.setFields(fields);
 		
 		model.listFields = defaultListFields;
 		if (defaultListFields==null) {
@@ -135,32 +74,15 @@ public class EntityModelBuilder implements EntityConfig {
 			model.detailFields = getExceptRestFields(detailExceptFields);
 		}
 		
-		String colName;
-		List<String> noFieldCols = new ArrayList<>();
-		for (ColumnInfo col: tableColumns) {
-			colName = col.getName().toLowerCase();
-			if (!model.columnFieldMap.containsKey(colName)) {
-				noFieldCols.add(colName);
-			}
-		}
-		model.noFieldColumns = noFieldCols.toArray(new String[0]);
-		
 		EntityModels.putEntityModel(model);
 		
-		//model.print();
-		
-		return model;
-	}
-	
-	private List<String> getAllFieldName() {
-		List<String> fieldNames = new ArrayList<>();
-		fieldNames.addAll(Arrays.asList(normalFields));
-		for (FieldInfo field:fieldInfos.values()) {
-			if (field.isMapping()) {
-				fieldNames.add(field.getName());
+		if (relationClasses!=null) {
+			for (Class<? extends Relation> rc: relationClasses) {
+				new RelationModelBuilder(rc, dao).buildModel();
 			}
 		}
-		return fieldNames;
+		
+		return model;
 	}
 	
 	private String[] getExceptRestFields(Collection<String> exceptFields) {
@@ -180,23 +102,6 @@ public class EntityModelBuilder implements EntityConfig {
 		return fields.toArray(new String[0]);
 	}
 
-
-	@Override
-	public void setFieldColumn(String fieldName, String columnName) {
-		FieldInfo fi = this.getField(fieldName);
-		if (fi!=null) {
-			fi.columnName = columnName;
-			for (ColumnInfo col: tableColumns) {
-				if (columnName.equalsIgnoreCase(col.getName())) {
-					fi.column = col;
-				}
-			}
-		}
-		if (fieldName.equals("id")) {
-			keyColumn = columnName;
-		}
-	}
-	
 	@Override
 	public void setListFields(String... fields) {
 		this.defaultListFields = formatViewFields(fields);
@@ -230,19 +135,10 @@ public class EntityModelBuilder implements EntityConfig {
 	FieldInfo getOrAddField(String fieldName) {
 		FieldInfo field = fieldInfos.get(fieldName);
 		if (field==null) {
-			field = new FieldInfo(entityClass, fieldName);
+			field = new FieldInfo(objectClass, fieldName);
 			fieldInfos.put(fieldName, field);
 		}
 		return field;
-	}
-	
-	private FieldInfo getField(String fieldName) {
-		for (FieldInfo field: fieldInfos.values()) {
-			if (field.getName().equalsIgnoreCase(fieldName)) {
-				return field;
-			}
-		}
-		return null;
 	}
 	
 	@Override
@@ -250,7 +146,7 @@ public class EntityModelBuilder implements EntityConfig {
 		
 		FieldInfo fkField = getField(foreignKeyField);
 		
-		String className = entityClass.getSimpleName();
+		String className = objectClass.getSimpleName();
 		String fkFieldName = className+"."+foreignKeyField;
 		
 		if (fkField==null) {
@@ -280,6 +176,12 @@ public class EntityModelBuilder implements EntityConfig {
 		for (String f: fields) {
 			detailExceptFields.add(f);
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void setRelations(Class... classes) {
+		this.relationClasses = classes;
 	}
 
 }

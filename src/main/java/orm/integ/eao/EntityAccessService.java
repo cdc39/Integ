@@ -36,7 +36,7 @@ public abstract class EntityAccessService<T extends Entity> extends EaoAdapter<T
 	}
 	
 	public Object createNewId() {
-		int keyLength = em.entityAnno().keyLength();
+		int keyLength = em.getTable().keyLength();
 		return IdGenerator.createRandomStr(keyLength, false);
 	}
 

@@ -1,16 +1,14 @@
-package orm.integ.eao.annotation;
+package orm.integ.dao.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import orm.integ.eao.model.Entity;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ForeignKey {
+public @interface Column {
 	
-	Class<? extends Entity> masterClass(); 
+	String value();
 	
 }

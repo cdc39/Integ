@@ -8,10 +8,15 @@ import java.util.Map;
 public class EntityModels {
 
 	private static Map<String, EntityModel> ems = new HashMap<>();
+	
 	private static Map<String, List<FieldInfo>> fkMap = new HashMap<>(); 
 	
 	static void putEntityModel(EntityModel em) {
 		ems.put(em.getEntityClass().getName(), em);
+	}
+	
+	public static EntityModel getByClass(Class<? extends Entity> clazz) {
+		return ems.get(clazz.getName());
 	}
 	
 	public static List<FieldInfo> getForeignKeyFields(Class<? extends Entity> clazz) {
