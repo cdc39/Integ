@@ -72,7 +72,7 @@ public abstract class TableModel implements TableInfo {
 		return false;
 	}
 	
-	public FieldInfo getFieldInfo(String fieldName) {
+	public FieldInfo getField(String fieldName) {
 		if (fieldName==null) {
 			return null;
 		}
@@ -110,7 +110,7 @@ public abstract class TableModel implements TableInfo {
 		FieldInfo field;
 		List<String> cols = new ArrayList<>();
 		for (ColumnInfo col: this.tableColumns) {
-			field = this.getFieldInfo(col.getName()) ;
+			field = this.getField(col.getName()) ;
 			if (field==null) {
 				cols.add(col.getName());
 			}

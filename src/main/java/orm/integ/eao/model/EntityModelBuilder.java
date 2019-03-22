@@ -13,7 +13,6 @@ import orm.integ.utils.IntegError;
 public class EntityModelBuilder extends TableModelBuilder implements EntityConfig {
 
 	private String tableKeyName;
-	private String keyColumn;
 	private String[] defaultListFields ;
 	private String[] defaultDetailFields;
 	
@@ -28,18 +27,8 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		
 		tableKeyName = getTableKeyName();
 		
-		keyColumn = table.keyColumn();
-		if (keyColumn.equals("")) {
-			keyColumn = tableKeyName+"_id"; 
-		}
-		
-		FieldInfo idField = fieldInfos.get("id");
-		if (idField.columnExists()) {
-			keyColumn = idField.columnName;
-		}
-		else {
-			setFieldColumn("id", keyColumn);
-		}
+		setFieldColumn("id", table.keyColumn());
+		setFieldColumn("id", tableKeyName+"_id");
 		setFieldColumn("name", tableKeyName+"_name");
 		
 	}
@@ -53,14 +42,13 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		return tableKeyName;
 	}
 	
-	
 	public EntityModel buildModel() {
 		
 		EntityModel model = new EntityModel();
 		super.buildModel(model);
 		
 		model.tableKeyName = tableKeyName;
-		model.keyColumn = keyColumn;
+		model.keyColumn = getField("id").getColumnName();
 		
 		List<String> fieldNames = getAllFieldName();
 		

@@ -18,7 +18,7 @@ public class FieldInfo {
 	
 	final String name;
 	
-	String columnName;
+	//String columnName;
 	
 	ColumnInfo column;
 	
@@ -37,7 +37,7 @@ public class FieldInfo {
 	}
 
 	public String getColumnName() {
-		return columnName;
+		return column==null?null:column.getName();
 	}
 
 	public ColumnInfo getColumn() {

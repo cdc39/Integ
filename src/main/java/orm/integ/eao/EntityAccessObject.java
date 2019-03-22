@@ -128,7 +128,7 @@ public class EntityAccessObject<T extends Entity> {
 		String colName;
 		for (int i=1; i<=colCount; i++) {
 			colName = metaData.getColumnName(i);
-			field = em.getFieldInfo(colName);
+			field = em.getField(colName);
 			if (field!=null) {
 				value = rset.getObject(i);
 				field.setValue(entity, value);
@@ -373,7 +373,7 @@ public class EntityAccessObject<T extends Entity> {
 
 		for(FieldChange fc:fieldChanges) {
 			fieldName = fc.getFieldName();
-			field = em.getFieldInfo(fieldName);
+			field = em.getField(fieldName);
 			if (field!=null && field.columnExists()) {
 				fields.add(fieldName);
 				colName = field.getColumnName();
@@ -443,7 +443,7 @@ public class EntityAccessObject<T extends Entity> {
 		Record record = new Record();
 		FieldInfo field;
 		for (String fieldName:viewFields) {
-			field = em.getFieldInfo(fieldName);
+			field = em.getField(fieldName);
 			value = getFieldValue(entity, field, true);
 			if (value!=null) {
 				record.put(fieldName, value);
@@ -517,13 +517,13 @@ public class EntityAccessObject<T extends Entity> {
 	
 	@SuppressWarnings("unchecked")
 	public <X> X getFieldValue(T entity, String fieldName)  {
-		FieldInfo field = em.getFieldInfo(fieldName);
+		FieldInfo field = em.getField(fieldName);
 		return (X) getFieldValue(entity, field, false);
 	}  
 	
 	@SuppressWarnings("unchecked")
 	public <X> X getFieldValue(T entity, String fieldName, boolean dynamicRefresh)  {
-		FieldInfo field = em.getFieldInfo(fieldName);
+		FieldInfo field = em.getField(fieldName);
 		return (X) getFieldValue(entity, field, dynamicRefresh);
 	}  
 
@@ -553,7 +553,7 @@ public class EntityAccessObject<T extends Entity> {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object getMappingFieldValue(T entity, FieldInfo field)  {
 		FieldMapping mapping = field.getMapping();
-		FieldInfo fkField = em.getFieldInfo(mapping.getForeignKeyField());
+		FieldInfo fkField = em.getField(mapping.getForeignKeyField());
 		Object relKeyId = getFieldValue(entity, fkField.getName());
 		EntityAccessObject relEao = Eaos.getEao(fkField.getMasterClass());
 		if (relEao!=null) {
@@ -593,7 +593,7 @@ public class EntityAccessObject<T extends Entity> {
 	private void afterChange(DataChange change) {
 		TransactionManager.afterChange(change, dataChangeListeners);
 	}
-
+	
 	public void setRelationValues(List<Record> list, Class<? extends Relation> clazz, String id2) {
 		
 		RelationModel relModel = RelationModels.getByClass(clazz);
@@ -618,10 +618,11 @@ public class EntityAccessObject<T extends Entity> {
 		for (Record rec: list) {
 			id = rec.get("id");
 			extRec = findRecordById(listExt, id);
+			extRec.remove("id");
 			setRelationValues(rec, extRec, relModel);
 		}
-		
-	} 
+
+	}
 	
 	public void setRelationValues(Record record, Class<? extends Relation> clazz, String id2) {
 		
@@ -669,26 +670,20 @@ public class EntityAccessObject<T extends Entity> {
 	
 	@SuppressWarnings("rawtypes")
 	protected void setRelationValues(Record record, Map extRec, RelationModel relModel) {
-		if (extRec==null) {
+		if (record==null || extRec==null || relModel==null) {
 			return;
 		}
 		Object value;
-		String fieldName;
 		FieldInfo field;
-		String name1;
+		Record relRec = new Record();
 		for (Object name: extRec.keySet()) {
-			name1 = name.toString();
-			field = em.getFieldInfo(name1);
-			if (field!=null || name1.equals("id")) {
-				continue;
-			}
-			field = relModel.getFieldInfo(name1);
+			field = relModel.getField(name.toString());
 			value = extRec.get(name);
-			if (value!=null) {
-				fieldName = field.getName();
-				record.put(fieldName, value);
+			if (field!=null && value!=null) {
+				relRec.put(field.getName(), value);
 			}
 		}
+		record.put(relModel.getFieldPrefix(), relRec);
 	}
 	
 }

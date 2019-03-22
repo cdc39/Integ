@@ -30,7 +30,6 @@ public abstract class TableModelBuilder  {
 	
 	protected Map<String, FieldInfo> fieldInfos = new HashMap<>();
 	
-	
 	@SuppressWarnings("unchecked")
 	public TableModelBuilder(Class objectClass, DataAccessObject dao) {
 		
@@ -56,45 +55,49 @@ public abstract class TableModelBuilder  {
 		}
 		this.tableColumns = dao.getTableColumns(fullTableName);  
 		
-		FieldInfo fi;
+		FieldInfo field;
 		Field f;
 		String colName;
 		ForeignKey fk;
 		Column col;
-		ColumnInfo column;
-		for (String field:normalFields) {
-			fi = new FieldInfo(objectClass, field);
-			f = ca.getField(field);
-			fi.field = f;
-			fi.setter = ca.getSetterMethod(f);
-			fi.getter = ca.getGetterMethod(field);
+		for (String fieldName:normalFields) {
+			
+			field = new FieldInfo(objectClass, fieldName);
+			f = ca.getField(fieldName);
+			field.field = f;
+			field.setter = ca.getSetterMethod(f);
+			field.getter = ca.getGetterMethod(fieldName);
 			
 			col = f.getAnnotation(Column.class);
 			if (col!=null) {
 				colName = col.value();
 			} else { 
-				colName = StringUtils.hump2underline(field);
+				colName = StringUtils.hump2underline(fieldName);
 			}
-			fi.columnName = colName;
-			column = findColumn(colName);
-			fi.column = column;
+			setFieldColumn(field, colName);
 			
 			fk = f.getAnnotation(ForeignKey.class);
 			if (fk!=null) {
-				fi.masterClass = fk.masterClass();
+				field.masterClass = fk.masterClass();
 			}
-			fieldInfos.put(field, fi);
+			fieldInfos.put(fieldName, field);
 		}
-		
+
+		setFieldColumn("createTime", table.createTimeColumn());
+
 	}
 	
-	protected void setFieldColumn(String fieldName, String colName) {
-		FieldInfo field = fieldInfos.get(fieldName);
-		if (field!=null && !field.columnExists()) {
-			field.columnName = colName;
-			field.column = findColumn(colName);
-		}
+	protected void setFieldColumn(String fieldName, String columnName) {
+		setFieldColumn(getField(fieldName), columnName);
 	}
+	
+	protected void setFieldColumn(FieldInfo field, String colName) {
+		if (field==null || field.columnExists() || colName==null 
+				|| colName.trim().length()==0) {
+			return;
+		}
+		field.column = findColumn(colName);
+	}	
 	
 	protected ColumnInfo findColumn(String colName) {
 		for (ColumnInfo col: tableColumns) {

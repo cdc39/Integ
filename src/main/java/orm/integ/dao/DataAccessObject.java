@@ -51,10 +51,6 @@ public class DataAccessObject {
 		jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 	
-//	public SqlDialect getSqlBuilder(QueryRequest qreq) {
-//		return new Dialect4MySQL(qreq);
-//	}
-	
 	public Connection getConnection() {
 		try {
 			return dataSource.getConnection();
@@ -125,6 +121,7 @@ public class DataAccessObject {
 		}
 		return n;
 	}
+	
 	public long queryForLong(String sql, Object... values) {
 		printSql(sql, values);
 		long n = getJdbcTemplate().queryForLong(sql, values);
@@ -132,14 +129,6 @@ public class DataAccessObject {
 			log.debug("result="+n);
 		}
 		return n;
-	}
-	public String queryForString(String sql, Object... values) {
-		Object value = getJdbcTemplate().queryForObject(sql, values, String.class);
-		return (String)value;
-	}
-	public Date queryForDate(String sql, Object...values) {
-		Object value = getJdbcTemplate().queryForObject(sql, values, Timestamp.class);
-		return (Date)value;
 	}
 
 	public int queryCount(String tableName, String whereStmt, Object... values) {
@@ -172,22 +161,6 @@ public class DataAccessObject {
 		return list;
 	}
 	
-//	@SuppressWarnings("unchecked")
-//	public String queryFirstId(TabQuery model) {
-//		String sql = getSqlBuilder(model).makeQueryFirstIdSql();
-//		Object[] values = model.linkValues();
-//		log.debug("queryFirstId: " + toString(sql, values));
-//		List<String> list = getJdbcTemplate().query(sql, values, new RowMapper(){
-//			@Override
-//			public Object mapRow(ResultSet rset, int row) throws SQLException { 
-//				return rset.getString(1);
-//			}
-//		});
-//		log.debug("Get "+list.size()+" items");
-//		String firstId = list.size()>0?list.get(0):null;
-//		return firstId;
-//	}
-	
 	public int executeSql(String sql, Object... values) {
 		printSql(sql, values);
 		date2Timestamp(values);
@@ -195,8 +168,6 @@ public class DataAccessObject {
 		log.debug(rt>0?("affect "+rt+" record"):null);
 		return rt;
 	}
-	
-
 	
 	private void date2Timestamp(Object[] values) {
 		for (int i=0; i<values.length; i++) {
@@ -223,15 +194,9 @@ public class DataAccessObject {
 		return query(sql.getStatement(), sql.getValues(), rowMapper);
 	}	
 	
-	@SuppressWarnings("unchecked")
-	public <X> X querySingle(String sql, Object[] values, RowMapper rowMapper) {
-		List list = query(sql, values, rowMapper);
-		if (list.size()==1) {
-			return (X) list.get(0);
-		}
-		else {
-			return null;
-		}
+	public List query(QueryRequest request, RowMapper rowMapper) {
+		String sql = dialect.makePageQuerySql(request);
+		return this.query(sql, request.getValues(), rowMapper);
 	}
 
 	public int getNextIntId(String tableName, String keyColumn) {
@@ -251,93 +216,34 @@ public class DataAccessObject {
 		log.debug("Get "+getRecordNum+" items");
 	}
 
-	public Map statQuery(String sql, Object... values) {
+	public Map queryForMap(String sql, Object... values) {
 		Map map = jdbcTemplate.queryForMap(sql, values);
 		return map;
 	}
 	
-	public double queryForDouble(String sql, Object... values) {
-		Map result = statQuery(sql, values); 
-		Object[] rtValues = result.values().toArray();
-		if (rtValues==null || rtValues.length==0) {
-			return 0;
-		}
-		else {
-			return Convertor.toDouble(rtValues[0], 0);
-		}
-	}
-	
-	/*
-	protected void executeSqls(final List<String> sqls) {
-		transactionTemplate.execute (
-				new TransactionCallback()
-				{
-					public Object doInTransaction(TransactionStatus status)
-					{
-						JdbcTemplate jt = new JdbcTemplate(dataSource);
-						for (String sql: sqls) {
-							System.out.println("execute sql: "+ sql);
-							jt.execute(sql);
-							//throw new RuntimeException("这是异常测试");
-						}
-						return null;
-					}
-				}
-		);
-	}
-	*/
-	
-
-	public void addBatch(PreparedStatement ps, Object[] values) throws Exception {
-		Object value;
-		//Printer.get().print(values, "values");
-		for (int i=1; i<=values.length; i++) {
-			value = values[i-1];
-			if (value==null) {
-				ps.setString(i, null);
-			}
-			else if (value instanceof String) {
-				ps.setString(i, (String)value);
-			}
-			else if (value instanceof Integer) {
-				ps.setInt(i, (Integer)value);
-			}
-			else if (value instanceof Long) {
-				ps.setLong(i, (Long)value);
-			}
-			else if (value instanceof Float) {
-				ps.setFloat(i, (Float)value);
-			}
-			else if (value instanceof Double) {
-				ps.setDouble(i, (Double)value);
-			}
-			else if (value instanceof Date) {
-				Date date = (Date)value;
-				Timestamp time = new Timestamp(date.getTime());
-				ps.setTimestamp(i, time);
-			}
-			else if (value instanceof Timestamp) {
-				ps.setTimestamp(i, (Timestamp)value);
-			}
-		}
-		ps.addBatch();
-	}
-	
-
-	
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) {
-		return jdbcTemplate.queryForObject(sql, args, rowMapper);
+		this.printSql(sql, args);
+		Object obj = jdbcTemplate.queryForObject(sql, args, rowMapper);
+		this.printGetResult(obj==null?0:1);
+		return obj;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T queryForObject(String sql, Object[] args, Class<T> returnClass) {
+		this.printSql(sql, args);
+		T obj = (T) jdbcTemplate.queryForObject(sql, args, returnClass);
+		this.printGetResult(obj==null?0:1);
+		return obj;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<ListOrderedMap> queryForList(String sql, Object... values) {
-		return jdbcTemplate.queryForList(sql, values); 
+		this.printSql(sql, values);
+		List<ListOrderedMap> list = jdbcTemplate.queryForList(sql, values);
+		this.printGetResult(list.size());
+		return list;
 	}
 	
-	public List query(QueryRequest request, RowMapper rowMapper) {
-		String sql = dialect.makePageQuerySql(request);
-		return this.query(sql, request.getValues(), rowMapper);
-	}
 
 	public void insert(String tableName, Map<String, ?> cols) {
 		String[] colNames = cols.keySet().toArray(new String[0]);
@@ -397,16 +303,40 @@ public class DataAccessObject {
 		return this.executeSql(sql, values2);
 	}
 	
-	public int getNextOrderNo(String tableName, String groupColumn, String groupId) {
-		String sql = "select ifnull(max(order_no),0) from "+tableName+" where "+groupColumn+"=?";
-		int maxNo = this.queryForInt(sql, groupId);
-		return maxNo+1;
+	public void addBatch(PreparedStatement ps, Object[] values) throws Exception {
+		Object value;
+		for (int i=1; i<=values.length; i++) {
+			value = values[i-1];
+			if (value==null) {
+				ps.setString(i, null);
+			}
+			else if (value instanceof String) {
+				ps.setString(i, (String)value);
+			}
+			else if (value instanceof Integer) {
+				ps.setInt(i, (Integer)value);
+			}
+			else if (value instanceof Long) {
+				ps.setLong(i, (Long)value);
+			}
+			else if (value instanceof Float) {
+				ps.setFloat(i, (Float)value);
+			}
+			else if (value instanceof Double) {
+				ps.setDouble(i, (Double)value);
+			}
+			else if (value instanceof Date) {
+				Date date = (Date)value;
+				Timestamp time = new Timestamp(date.getTime());
+				ps.setTimestamp(i, time);
+			}
+			else if (value instanceof Timestamp) {
+				ps.setTimestamp(i, (Timestamp)value);
+			}
+		}
+		ps.addBatch();
 	}
-	public int getNextOrderNo(String tableName) {
-		String sql = "select ifnull(max(order_no),0) from "+tableName;
-		int maxNo = this.queryForInt(sql);
-		return maxNo+1;
-	}
+	
 	public int getNextSeqNo(String tableName, String seqCol) {
 		String sql = "select ifnull(max("+seqCol+"),0) from "+tableName;
 		int maxNo = this.queryForInt(sql);

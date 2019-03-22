@@ -5,7 +5,10 @@ import orm.integ.utils.IntegError;
 public class RelationModel extends TableModel {
 
 	String[] keyColumns;
+	
 	FieldInfo[] keyFields;
+	
+	String fieldPrefix;
 	
 	@Override
 	public String[] getKeyColumns() {
@@ -17,6 +20,10 @@ public class RelationModel extends TableModel {
 		return (Class<? extends Relation>) this.objectClass;
 	}
 
+	public String getFieldPrefix() {
+		return fieldPrefix;
+	}
+	
 	public FieldInfo[] getKeyFields(Class<? extends Entity> masterClass) {
 		if (keyFields[0].getMasterClass()==masterClass) {
 			return keyFields;

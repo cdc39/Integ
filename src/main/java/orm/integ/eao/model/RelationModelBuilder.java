@@ -11,6 +11,7 @@ public class RelationModelBuilder extends TableModelBuilder {
 
 	private String[] keyColumns;
 	private FieldInfo[] keyFields;
+	private String fieldPrefix;
 	
 	public RelationModelBuilder(Class relationClass, DataAccessObject dao) {
 		super(relationClass, dao);
@@ -35,6 +36,10 @@ public class RelationModelBuilder extends TableModelBuilder {
 		}
 		this.keyColumns = keyColumnList.toArray(new String[0]);
 		this.keyFields = keyFields.toArray(new FieldInfo[0]);
+		
+		String temp = relationClass.getSimpleName();
+		fieldPrefix = temp.substring(0, 1).toLowerCase()+temp.substring(1);
+		
 	}
 
 	public RelationModel buildModel() {
@@ -42,6 +47,7 @@ public class RelationModelBuilder extends TableModelBuilder {
 		this.buildModel(model);
 		model.keyColumns = keyColumns;
 		model.keyFields = keyFields;
+		model.fieldPrefix = fieldPrefix;
 		RelationModels.putModel(model);
 		return model;
 	}

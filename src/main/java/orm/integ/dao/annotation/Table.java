@@ -17,4 +17,6 @@ public @interface Table {
 
 	String keyColumn() default "";
 	
+	String createTimeColumn() default "";
+	
 }
