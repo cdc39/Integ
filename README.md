@@ -155,7 +155,7 @@ public class StudentService extends EntityAccessService<Student> {
 
 ORM问题域的需求，是需要直接操作对象而不是操作数据库，需要增删改查功能，需要缓存，需要事务，需要广泛的适应性，灵活的扩展性，这些Integ都能提供。未来要适配几十种数据库，适配Redis，适配分库分表，也都不难。因此 Integ 可以说是功能近乎完备的ORM框架。
 
-同时Integ还做到了极简。目前Integ代码只有48K，发展到究极形态，估计也不会超过300K。
+同时Integ还做到了极简。目前Integ代码只有125K。
 
 Hibernate较EJB更轻量级
 MyBatis较Hibernate更轻量级
