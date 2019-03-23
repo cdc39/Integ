@@ -31,6 +31,7 @@ import orm.integ.dao.sql.TabQuery;
 import orm.integ.dao.sql.Where;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
+import orm.integ.utils.MyLogger;
 import orm.integ.utils.StringUtils;
 
 @SuppressWarnings("rawtypes")
@@ -217,7 +218,9 @@ public class DataAccessObject {
 	}
 
 	public Map queryForMap(String sql, Object... values) {
+		this.printSql(sql, values);
 		Map map = jdbcTemplate.queryForMap(sql, values);
+		MyLogger.printMap(map, "result map");
 		return map;
 	}
 	

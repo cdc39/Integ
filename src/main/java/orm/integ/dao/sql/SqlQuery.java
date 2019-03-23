@@ -7,6 +7,7 @@ public class SqlQuery extends QueryRequest {
 	public SqlQuery(String sql, Object... values) {
 		this.sql = sql;
 		this.values = values==null?new Object[]{}:values;
+		this.setUseCache(false);
 	}
 	
 	public SqlQuery(StatementAndValue sql) {

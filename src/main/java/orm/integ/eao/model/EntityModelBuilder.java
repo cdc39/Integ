@@ -62,13 +62,14 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 			model.detailFields = getExceptRestFields(detailExceptFields);
 		}
 		
-		EntityModels.putEntityModel(model);
+		TableModels.putModel(model);
 		
 		if (relationClasses!=null) {
 			for (Class<? extends Relation> rc: relationClasses) {
 				new RelationModelBuilder(rc, dao).buildModel();
 			}
 		}
+		model.relationClasses = relationClasses;
 		
 		return model;
 	}

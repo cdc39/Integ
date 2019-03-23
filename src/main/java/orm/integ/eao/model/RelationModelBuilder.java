@@ -48,7 +48,7 @@ public class RelationModelBuilder extends TableModelBuilder {
 		model.keyColumns = keyColumns;
 		model.keyFields = keyFields;
 		model.fieldPrefix = fieldPrefix;
-		RelationModels.putModel(model);
+		TableModels.putModel(model);
 		return model;
 	}
 

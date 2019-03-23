@@ -35,6 +35,10 @@ public abstract class TableModel implements TableInfo {
 		}
 	}
 	
+	public Class<?> getObjectClass() {
+		return objectClass;
+	}
+	
 	public Table getTable() {
 		return table;
 	}
@@ -121,14 +125,19 @@ public abstract class TableModel implements TableInfo {
 	public void print() {
 		System.out.println("\n载入模型："+objectClass.getSimpleName());
 		System.out.println("对应数据库表："+this.fullTableName);
-		System.out.printf("\n%10s%12s%16s\n", "属性名", "属性类别", "字段名");
+		System.out.printf("\n%10s%12s%16s\n", "属性名", "属性类别", "字段名[类型]");
 		System.out.println("---------------------------------------------------------");
-		String relColName, fieldType;
+		String colName, fieldType;
+		ColumnInfo col;
 		for (FieldInfo field: fields) {
-			relColName = field.column!=null?field.column.getName():"-";
+			col = field.getColumn();
+			colName = "-";
+			if (col!=null) {
+				colName = col.getName()+" ["+col.getType()+":"+col.getTypeName()+"]";
+			}
 			fieldType = field.isNormal()?"普通":"映射";
 			System.out.printf("%16s %8s %22s\n", 
-					field.getName(), fieldType, relColName);
+					field.getName(), fieldType, colName);
 		}
 		List<String> noFieldColumns = this.getNoFieldColumns();
 		String noFieldCols = StringUtils.link(noFieldColumns, ",");

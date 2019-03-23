@@ -1,5 +1,7 @@
 package orm.integ.utils;
 
+import java.util.Map;
+
 public class MyLogger {
 
 	public static void printError(Throwable e, String... msgs) {
@@ -17,6 +19,18 @@ public class MyLogger {
 
 	public static void print(String msg) {
 		System.out.println(msg);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static void printMap(Map map, String name) {
+		System.out.println(name+": ");
+		Object value;
+		for (Object key: map.keySet()) {
+			value = map.get(key);
+			if (value!=null) {
+				System.out.println("    "+key+" -> "+value+" ["+value.getClass().getSimpleName()+"]");
+			}
+		}
 	}
 	
 }
