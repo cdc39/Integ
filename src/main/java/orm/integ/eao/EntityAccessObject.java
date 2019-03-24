@@ -199,7 +199,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		DataChange change = ChangeFactory.newInsert(entity);
 		adapter.beforeChange(change);
 		insert(entity, em);
-		FromOrmHelper.setFromOrm(entity);
 		afterChange(change);
 		putToCache(entity);
 		adapter.afterChange(change);

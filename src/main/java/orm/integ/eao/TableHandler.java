@@ -70,7 +70,7 @@ public class TableHandler {
 		return object;
 	}
 
-	protected Map<String, Object> calcUpdataFields(Object old, Object now, TableModel model) {
+	protected Map<String, Object> calcUpdataFields(RecordObject old, RecordObject now, TableModel model) {
 		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(old, now);
 		List<String> fields = new ArrayList<>();
 		String fieldName, colName;
@@ -91,7 +91,7 @@ public class TableHandler {
 		return updateFields;
 	}
 	
-	protected void insert(Object obj, TableModel table) {
+	protected void insert(RecordObject obj, TableModel table) {
 		FieldInfo[] fields = table.getFields();
 		Map<String, Object> colValues = new HashMap<>();
 		Object value;
@@ -107,6 +107,7 @@ public class TableHandler {
 			}
 		}
 		dao.insert(table.getTableName(), colValues);	
+		FromOrmHelper.setFromOrm(obj);
 	}
 	
 }

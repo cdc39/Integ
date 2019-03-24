@@ -18,8 +18,6 @@ public class FieldInfo {
 	
 	final String name;
 	
-	//String columnName;
-	
 	ColumnInfo column;
 	
 	Field field;
@@ -60,7 +58,7 @@ public class FieldInfo {
 		return getter;
 	}
 
-	public Object getValue(Object entity) {
+	public Object getValue(RecordObject entity) {
 		if (entity!=null && getter!=null) {
 			try {
 				return getter.invoke(entity);
@@ -72,7 +70,7 @@ public class FieldInfo {
 		return null;
 	}
 	
-	public void setValue(Object obj, Object value) {
+	public void setValue(RecordObject obj, Object value) {
 		if (setter==null) {
 			return;
 		}

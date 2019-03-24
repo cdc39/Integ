@@ -49,11 +49,11 @@ public class RelationAccessObject extends TableHandler {
 	}
 	
 	public <R extends Relation> R querySingle(R rel) {
-		List<R> list = query(rel);
+		List<R> list = queryList(rel);
 		return list.size()==1?list.get(0):null;
 	}
 	
-	public boolean relationExists(Relation rel) {
+	public boolean recordExists(Relation rel) {
 		TabQuery query = buildQuery(rel);
 		int count = dao.queryCount(query);
 		return count>0;
@@ -63,7 +63,7 @@ public class RelationAccessObject extends TableHandler {
 		if (rel==null) {
 			return false;
 		}
-		if (relationExists(rel)) {
+		if (recordExists(rel)) {
 			return false;
 		}
 		RelationModel relModel = getModel(rel);
@@ -77,7 +77,7 @@ public class RelationAccessObject extends TableHandler {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <R extends Relation> List<R> query(R rel) {
+	public <R extends Relation> List<R> queryList(R rel) {
 		TabQuery query = buildQuery(rel);
 		RelationModel model = getModel(rel);
 		List<R> list = dao.query(query, new TableRowMapper(model));
@@ -135,7 +135,7 @@ public class RelationAccessObject extends TableHandler {
 		return null;
 	}
 
-	public <R extends Relation> void update(R rel) {
+	public void update(Relation rel) {
 		
 		if (rel==null) {
 			return;
@@ -143,7 +143,7 @@ public class RelationAccessObject extends TableHandler {
 		if (!FromOrmHelper.isFromOrm(rel)) {
 			throw new IntegError("object is not created by integ, can not be update.");
 		}
-		R old = this.querySingle(rel);
+		Relation old = this.querySingle(rel);
 		if (old==null) {
 			return;
 		}
@@ -162,6 +162,47 @@ public class RelationAccessObject extends TableHandler {
 		
 		dao.update(relModel.getTableName(), updateFields, where);
 		
+	}
+
+	public <R extends Relation> R save(R rel) {
+		
+		if (rel==null) {
+			return null;
+		}
+		boolean exists = recordExists(rel);
+		if (!exists) {
+			insert(rel);
+			return rel;
+		}
+		
+		RelationModel model = TableModels.getModel(rel.getClass());
+
+		R old = rel;
+		if (!FromOrmHelper.isFromOrm(rel)) {
+			old = querySingle(rel);
+		}
+		
+		Record rec = toRecordNoKey(rel);
+
+		Object value;
+		FieldInfo field;
+		
+		for (String name: rec.keySet()) {
+			field = model.getField(name);
+			value = rec.get(name);
+			if (value!=null && field!=null) {
+				field.setValue(old, value);
+			}
+		}
+		
+		this.update(old);
+		
+		return old;
+	}
+
+	public <R extends Relation> List<R> queryById(Class<R> relClass, Class<? extends Entity> class1, Object id1) {
+		R  rel = newRelation(relClass, class1, id1, null);
+		return this.queryList(rel);
 	}
 	
 }
