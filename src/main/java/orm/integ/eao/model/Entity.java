@@ -1,15 +1,9 @@
 package orm.integ.eao.model;
 
-import java.util.Date;
-
-public class Entity implements HasId {
+public class Entity extends RecordObject implements HasId {
 
 	protected String id;
 	
-	protected Date createTime; 
-	
-	byte fromOrm = 0;
-
 	public String getId() {
 		return id;
 	}
@@ -18,12 +12,4 @@ public class Entity implements HasId {
 		this.id = id==null?null:id.toString();
 	}
 	
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
-
 }

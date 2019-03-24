@@ -3,7 +3,6 @@ package orm.integ.utils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 
@@ -24,6 +23,23 @@ public class ObjectHandler {
 		}
 		return null;
 	}
+	
+	@SuppressWarnings("rawtypes")
+	public static <K> K create(Class<K> clazz, Map map) {
+		if (clazz==null || map==null) {
+			return null;
+		}
+		K obj = null;
+		try {
+			obj = clazz.newInstance();
+			new ObjectHandler(obj).setValues(map);
+			return  obj;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	
 	private Object object;
 	private ClassAnalyzer ca;
@@ -61,14 +77,14 @@ public class ObjectHandler {
 		}
 	}
 	
-	public void setValues(Map<String, Object> valueMap)  {
-		Iterator<String> it = valueMap.keySet().iterator();
-		String name;
-		Object value;
-		while (it.hasNext()) {
-			name = (String)it.next();
-			value = valueMap.get(name);
-			setValue(name, value);
+	@SuppressWarnings("rawtypes")
+	public void setValues(Map valueMap)  {
+		Object value ;
+		for (Object key: valueMap.keySet()) {
+			value = valueMap.get(key);
+			if (key!=null) {
+				setValue(key.toString(), value);
+			}
 		}
 	}
 	
@@ -148,5 +164,7 @@ public class ObjectHandler {
 		Map<String, Object> values = obh.getValues(fields, true);
 		this.setValues(values);
 	}
+
+
 	
 }

@@ -224,6 +224,12 @@ public class DataAccessObject {
 		return map;
 	}
 	
+	public Map queryForMap(TabQuery query) {
+		String sql = dialect.makeQuerySql(query);
+		Map map = queryForMap(sql, query.getValues());
+		return map;
+	}
+	
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) {
 		this.printSql(sql, args);
 		Object obj = jdbcTemplate.queryForObject(sql, args, rowMapper);

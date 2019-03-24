@@ -8,11 +8,6 @@ public class EntityModel extends TableModel {
 	String[] detailFields;
 	Class<? extends Relation>[] relationClasses;
 	
-	@SuppressWarnings("unchecked")
-	public Class<? extends Entity> getEntityClass() {
-		return (Class<? extends Entity>) objectClass;
-	}
-	
 	public String getKeyColumn() {
 		return keyColumn;
 	}

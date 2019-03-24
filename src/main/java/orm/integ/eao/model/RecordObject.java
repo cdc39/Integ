@@ -2,10 +2,12 @@ package orm.integ.eao.model;
 
 import java.util.Date;
 
-public class Relation extends RecordObject {
+public class RecordObject {
 
-	private Date createTime;
-
+	protected Date createTime; 
+	
+	byte fromOrm = 0;
+	
 	public Date getCreateTime() {
 		return createTime;
 	}

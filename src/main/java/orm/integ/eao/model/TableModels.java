@@ -32,8 +32,12 @@ public class TableModels {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends TableModel> T getByClass(Class<?> clazz) {
-		return (T) ems.get(clazz.getName());
+	public static <T extends TableModel> T getModel(Class<?> clazz) {
+		TableModel model = ems.get(clazz.getName());
+		if (model==null) {
+			System.out.println(clazz.getName()+" 没有注册TableModel");
+		}
+		return  (T) model;
 	}
 	
 	public static List<FieldInfo> getForeignKeyFields(Class<? extends Entity> clazz) {

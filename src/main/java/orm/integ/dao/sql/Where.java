@@ -83,6 +83,11 @@ public class Where {
 		return whereStmt;
 	}
 	
+	public StatementAndValue toStatementAndValue() {
+		String where = this.itemsToStatement();
+		return new StatementAndValue(where, values);
+	}
+	
 	private boolean isNull(String s) {
 		return s==null||s.trim().equals("");
 	}

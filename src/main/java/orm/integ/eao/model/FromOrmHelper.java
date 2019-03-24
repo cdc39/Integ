@@ -2,16 +2,16 @@ package orm.integ.eao.model;
 
 public class FromOrmHelper {
 
-	public static boolean isFromOrm(Entity entity) {
-		if (entity==null) {
+	public static boolean isFromOrm(RecordObject obj) {
+		if (obj==null) {
 			return false;
 		}
-		return entity.fromOrm==1;
+		return obj.fromOrm==1;
 	}
 	
-	public static void setFromOrm(Entity entity) {
-		if (entity!=null) {
-			entity.fromOrm = 1;
+	public static void setFromOrm(RecordObject obj) {
+		if (obj!=null) {
+			obj.fromOrm = 1;
 		}
 	}
 	

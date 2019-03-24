@@ -2,9 +2,6 @@ package orm.integ.eao;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,10 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.map.ListOrderedMap;
 import org.springframework.jdbc.core.RowMapper;
 
-import orm.integ.dao.DBUtil;
 import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.dao.sql.StatementAndValue;
@@ -37,23 +32,18 @@ import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
 import orm.integ.eao.model.Relation;
 import orm.integ.eao.model.RelationModel;
-import orm.integ.eao.model.TableModel;
 import orm.integ.eao.model.TableModels;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.DataChange;
 import orm.integ.eao.transaction.DataChangeListener;
-import orm.integ.eao.transaction.FieldChange;
 import orm.integ.eao.transaction.TransactionManager;
-import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
-import orm.integ.utils.StringUtils;
 
-public class EntityAccessObject<T extends Entity> {
+public class EntityAccessObject<T extends Entity> extends TableHandler {
 
 	public static int queryByIdsCount = 0;
 	
-	private DataAccessObject dao;
 	private EntityModel em;
 	private final Class<T> entityClass;
 	private final RowMapper rowMapper;
@@ -62,12 +52,17 @@ public class EntityAccessObject<T extends Entity> {
 	private final NoExistsCache notExistsCache = new NoExistsCache();
 	private final QueryManager<T> queryManager ;
 	private final List<DataChangeListener> dataChangeListeners = new ArrayList<>();
+	private final RelationAccessObject rao;
 	
 	@SuppressWarnings("unchecked")
 	public EntityAccessObject(EaoAdapter<T> adapter) {
 		
+		super(adapter.getDao());
+		
 		this.adapter = adapter;
 		this.dao = adapter.getDao();
+		this.rao = new RelationAccessObject(dao);
+		
         Type t = adapter.getClass().getGenericSuperclass();
         Type[] ts = ((ParameterizedType) t).getActualTypeArguments();
 		entityClass = (Class<T>)ts[0];
@@ -85,20 +80,7 @@ public class EntityAccessObject<T extends Entity> {
 		
 		Eaos.addEao(this);
 		
-		rowMapper = new RowMapper(){
-			@Override
-			public Object mapRow(ResultSet rset, int row) throws SQLException {
-				T entity = null;
-				try {
-					entity = (T) readRowValues(em, rset);
-					FromOrmHelper.setFromOrm(entity);
-				}
-				catch(Exception e) {
-					e.printStackTrace();
-				}
-				return entity;
-			}
-		};
+		rowMapper = new TableRowMapper(em);
 		
 	}
 	
@@ -116,25 +98,6 @@ public class EntityAccessObject<T extends Entity> {
 	
 	public DataChangeListener[] getDataChangeListeners() {
 		return dataChangeListeners.toArray(new DataChangeListener[0]);
-	}
-	
-	private Object readRowValues(TableModel model, ResultSet rset) throws Exception  {
-		Object object = model.getObjectClass().newInstance();
-		FieldInfo field;
-		Object value;
-		ResultSetMetaData metaData;
-		metaData = rset.getMetaData();
-		int colCount = metaData.getColumnCount();
-		String colName;
-		for (int i=1; i<=colCount; i++) {
-			colName = metaData.getColumnName(i);
-			field = model.getField(colName);
-			if (field!=null) {
-				value = rset.getObject(i);
-				field.setValue(object, value);
-			}
-		}
-		return object;
 	}
 
 	public T getById(Object id) {
@@ -226,24 +189,6 @@ public class EntityAccessObject<T extends Entity> {
 		return queryFirst(where, null, values);
 	}
 	
-	protected void insert(Object obj, TableModel table) {
-		FieldInfo[] fields = table.getFields();
-		Map<String, Object> colValues = new HashMap<>();
-		Object value;
-		Class<?> dbDataType;
-		for (FieldInfo field: fields) {
-			if (field.columnExists()) {
-				value = field.getValue(obj);
-				if (value!=null) {
-					dbDataType = DBUtil.getDataType(field.getColumn());
-					value = Convertor.translate(value, dbDataType);
-					colValues.put(field.getColumnName(), value);
-				}
-			}
-		}
-		dao.insert(table.getTableName(), colValues);	
-	}
-	
 	public void insert(T entity) {
 		String id = entity.getId();
 		if (id==null) {
@@ -298,7 +243,7 @@ public class EntityAccessObject<T extends Entity> {
 	
 	@SuppressWarnings("rawtypes")
 	public void testForienUseBeforeDelete(Object id) {
-		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(em.getEntityClass());
+		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(entityClass);
 		for (FieldInfo fkField: fkFields) {
 			if (fkField.columnExists()) {
 				EntityAccessObject eao = Eaos.getEao(fkField.getOwnerClass());
@@ -314,7 +259,7 @@ public class EntityAccessObject<T extends Entity> {
 	@SuppressWarnings("rawtypes")
 	public List<ForeignUse> scanForeignUse(Object id) {
 		List<ForeignUse> uses = new ArrayList<>();
-		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(em.getEntityClass());
+		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(entityClass);
 		for (FieldInfo fkField: fkFields) {
 			if (fkField.columnExists()) {
 				EntityAccessObject eao = Eaos.getEao(fkField.getOwnerClass());
@@ -330,13 +275,13 @@ public class EntityAccessObject<T extends Entity> {
 	@SuppressWarnings("rawtypes")
 	public void printForeignUse(Object id) {
 		
-		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(em.getEntityClass());
+		List<FieldInfo> fkFields = TableModels.getForeignKeyFields(entityClass);
 		List<ForeignUse> uses = scanForeignUse(id);
 		int total = 0;
 		for (ForeignUse fu: uses) {
 			total+=fu.getRecordCount();
 		}
-		String info = "实体类 "+em.getEntityClass().getSimpleName()+" 的主键 "
+		String info = "实体类 "+entityClass.getSimpleName()+" 的主键 "
 				+ em.getTableName() + "."+em.getKeyColumn()+" 总共对应  "+fkFields.size()+" 外键字段，"
 				+ "id值 "+id+" 在 "+uses.size()+" 个外键字段出现了 "+total+" 次：";
 		System.out.println("\n"+info);
@@ -366,23 +311,7 @@ public class EntityAccessObject<T extends Entity> {
 		DataChange change = ChangeFactory.newUpdate(old, entity);
 		adapter.beforeChange(change);
 
-		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(old, entity);
-		List<String> fields = new ArrayList<>();
-		String fieldName, colName;
-		Object value;
-		FieldInfo field ;
-		Map<String, Object> updateFields = new HashMap<String, Object>();
-
-		for(FieldChange fc:fieldChanges) {
-			fieldName = fc.getFieldName();
-			field = em.getField(fieldName);
-			if (field!=null && field.columnExists()) {
-				fields.add(fieldName);
-				colName = field.getColumnName();
-				value = field.getValue(entity);
-				updateFields.put(colName, value);
-			}
-		}
+		Map<String, Object> updateFields = super.calcUpdataFields(old, entity, em);
 		if (updateFields.size()==0) {
 			return ;
 		}
@@ -601,127 +530,41 @@ public class EntityAccessObject<T extends Entity> {
 		TransactionManager.afterChange(change, dataChangeListeners);
 	}
 	
-	public void setRelationValues(List<Record> list, Class<? extends Relation> clazz, String id2) {
-		
-		RelationModel relModel = TableModels.getByClass(clazz);
-		FieldInfo[] keyFields = relModel.getKeyFields(entityClass);
-
-		List<String> cols = new ArrayList<>();
-		for (FieldInfo field: relModel.getFields()) {
-			if (!field.isForeignKey() && field.columnExists()) {
-				cols.add(field.getColumnName());
-			}
-		}
-		String colStr = StringUtils.link(cols, ", ");
-		colStr = keyFields[0].getColumnName()+" id, "+colStr;
-		
-		String sql = "select "+colStr+" from "+relModel.getFullTableName()
-			+" where "+keyFields[1].getColumnName()+"=?";
-		
-		List<ListOrderedMap> listExt = dao.queryForList(sql, id2);
-		
-		Object id;
-		ListOrderedMap extRec;
-		for (Record rec: list) {
-			id = rec.get("id");
-			extRec = findRecordById(listExt, id);
-			if (extRec!=null) {
-				extRec.remove("id");
-				setRelationValues(rec, extRec, relModel);
-			}
-		}
-
-	}
-	
-	public void setRelationValues(Record record, Class<? extends Relation> clazz, String id2) {
-		
-		final RelationModel relModel = TableModels.getByClass(clazz);
-		
-		List<String> cols = new ArrayList<>();
-		for (FieldInfo field: relModel.getFields()) {
-			if (!field.isForeignKey() && field.columnExists()) {
-				cols.add(field.getColumnName());
-			}
-		}
-		String colStr = StringUtils.link(cols, ", ");
-		
-		FieldInfo[] keyFields = relModel.getKeyFields(entityClass);
-		String where = keyFields[0].getColumnName()+"=? and "+keyFields[1].getColumnName()+"=?";
-		
-		String sql = "select "+colStr+" from "+relModel.getFullTableName()
-			+" where "+where;
-		
-		String id1 = record.getString("id");
-		
-		List<ListOrderedMap> listExt = dao.queryForList(sql, id1, id2);
-		
-		if (listExt.size()>0) {
-			ListOrderedMap extRec = listExt.get(0);
-			MyLogger.printMap(extRec, "extRec");
-			setRelationValues(record, extRec, relModel);
-		}
-		
-	}
-	
-	
-	
-	@SuppressWarnings("rawtypes")
-	private <R extends Map> R findRecordById(List<R> list, Object id) {
-		if (id==null) {
-			return null;
-		}
-		String idStr = id.toString();
-		Object id2;
-		for (R rec: list) {
-			id2 = rec.get("id");
-			if (id2!=null && id2.toString().equals(idStr)) {
-				return rec;
-			}
-		}
-		return null;
-	}	
-	
-	@SuppressWarnings("rawtypes")
-	protected void setRelationValues(Record record, Map extRec, RelationModel relModel) {
-		if (record==null || extRec==null || relModel==null) {
+	public void setRelationValues(List<Record> list, List<? extends Relation> rels) {
+		if (list==null || rels==null || rels.size()==0) {
 			return;
 		}
-		Object value;
-		FieldInfo field;
-		Record relRec = new Record();
-		for (Object name: extRec.keySet()) {
-			field = relModel.getField(name.toString());
-			value = extRec.get(name);
-			if (field!=null && value!=null) {
-				if (value instanceof Boolean) {
-					value = ((Boolean)value).booleanValue()?1:0;
+		RelationModel relModel = TableModels.getModel(rels.get(0).getClass());
+		FieldInfo keyField = relModel.getKeyField(entityClass);
+		Object id, id2;
+		for (Record rec: list) {
+			id = rec.get("id").toString();
+			for (Relation rel: rels) {
+				id2 = keyField.getValue(rel).toString();
+				if (id2.equals(id)) {
+					setRelationValues(rec, rel);
 				}
-				relRec.put(field.getName(), value);
 			}
 		}
+	}
+	
+	public void setRelationValues(Record record, Relation rel) {
+		if (record==null || rel==null) {
+			return;
+		}
+		RelationModel relModel = TableModels.getModel(rel.getClass());
+		Record relRec = rao.toRecordNoKey(rel);
 		record.put(relModel.getFieldPrefix(), relRec);
 	}
-	
-	public boolean relationExists(Relation rel) {
-		RelationModel relModel = TableModels.getByClass(rel.getClass());
-		FieldInfo[] keyFields = relModel.getKeyFields(entityClass);
-		String where = keyFields[0].getColumnName()+"=? and "+keyFields[1].getColumnName()+"=?";
-		Object[] ids = new Object[]{ keyFields[0].getValue(rel), keyFields[1].getValue(rel)};
-		int count = dao.queryCount(relModel.getFullTableName(), where, ids);
-		return count>0;
-	}
-	
-	public boolean insertRelation(Relation rel){
-		if (rel==null) {
-			return false;
+
+	public void setRelationValues(List<Record> recs, Class<? extends Relation> class1, String id2) {
+		String id;
+		Relation rel;
+		for (Record rec: recs) {
+			id = rec.getString("id");
+			rel = rao.newRelation(class1, entityClass, id, id2);
+			setRelationValues(rec, rel);
 		}
-		if (relationExists(rel)) {
-			return false;
-		}
-		RelationModel relModel = TableModels.getByClass(rel.getClass());
-		rel.setCreateTime(new Date());
-		insert(rel, relModel);
-		return true;
 	}
 	
 }

@@ -35,7 +35,8 @@ public abstract class TableModel implements TableInfo {
 		}
 	}
 	
-	public Class<?> getObjectClass() {
+	@SuppressWarnings("rawtypes")
+	public Class getObjectClass() {
 		return objectClass;
 	}
 	
@@ -108,6 +109,16 @@ public abstract class TableModel implements TableInfo {
 			}
 		}
 		return restFields.toArray(new String[]{});
+	}
+	
+	public String[] getNotKeyFields() {
+		List<String> rtFields = new ArrayList<>();
+		for (FieldInfo field: fields) {
+			if (!field.isForeignKey()) {
+				rtFields.add(field.getName());
+			}
+		}
+		return rtFields.toArray(new String[]{});
 	}
 	
 	public List<String> getNoFieldColumns() {

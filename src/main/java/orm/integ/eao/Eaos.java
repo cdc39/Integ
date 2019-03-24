@@ -13,8 +13,12 @@ public class Eaos {
 
 	static Map<String, EntityAccessObject> classNameEaos = new ConcurrentHashMap<>();
 
+	public static Map<String, EntityAccessObject> getAllEao() {
+		return classNameEaos;
+	}
+	
 	public static void addEao(EntityAccessObject eao) {
-		classNameEaos.put(eao.getEntityModel().getEntityClass().getName(), eao);
+		classNameEaos.put(eao.getEntityModel().getObjectClass().getName(), eao);
 	}
 	
 	public static EntityAccessObject getEao(Class clazz) {

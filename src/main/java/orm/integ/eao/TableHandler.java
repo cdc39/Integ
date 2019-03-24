@@ -1,0 +1,112 @@
+package orm.integ.eao;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.jdbc.core.RowMapper;
+
+import orm.integ.dao.DBUtil;
+import orm.integ.dao.DataAccessObject;
+import orm.integ.eao.model.FieldInfo;
+import orm.integ.eao.model.FromOrmHelper;
+import orm.integ.eao.model.RecordObject;
+import orm.integ.eao.model.TableModel;
+import orm.integ.eao.transaction.ChangeFactory;
+import orm.integ.eao.transaction.FieldChange;
+import orm.integ.utils.Convertor;
+
+public class TableHandler {
+
+	DataAccessObject dao;
+	
+	public TableHandler(DataAccessObject dao) {
+		this.dao = dao;
+	}
+	
+	class TableRowMapper implements RowMapper {
+
+		TableModel model;
+		
+		TableRowMapper(TableModel model) {
+			this.model = model;
+		}
+		
+		@Override
+		public Object mapRow(ResultSet rset, int row) throws SQLException {
+			RecordObject obj = null;
+			try {
+				obj = readRowValues(model, rset);
+				FromOrmHelper.setFromOrm(obj);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+			return obj;
+		}
+		
+	}
+	
+	protected RecordObject readRowValues(TableModel model, ResultSet rset) throws Exception  {
+		RecordObject object = (RecordObject) model.getObjectClass().newInstance();
+		FieldInfo field;
+		Object value;
+		ResultSetMetaData metaData;
+		metaData = rset.getMetaData();
+		int colCount = metaData.getColumnCount();
+		String colName;
+		for (int i=1; i<=colCount; i++) {
+			colName = metaData.getColumnName(i);
+			field = model.getField(colName);
+			if (field!=null) {
+				value = rset.getObject(i);
+				field.setValue(object, value);
+			}
+		}
+		return object;
+	}
+
+	protected Map<String, Object> calcUpdataFields(Object old, Object now, TableModel model) {
+		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(old, now);
+		List<String> fields = new ArrayList<>();
+		String fieldName, colName;
+		Object value;
+		FieldInfo field ;
+		Map<String, Object> updateFields = new HashMap<String, Object>();
+
+		for(FieldChange fc:fieldChanges) {
+			fieldName = fc.getFieldName();
+			field = model.getField(fieldName);
+			if (field!=null && field.columnExists()) {
+				fields.add(fieldName);
+				colName = field.getColumnName();
+				value = field.getValue(now);
+				updateFields.put(colName, value);
+			}
+		}
+		return updateFields;
+	}
+	
+	protected void insert(Object obj, TableModel table) {
+		FieldInfo[] fields = table.getFields();
+		Map<String, Object> colValues = new HashMap<>();
+		Object value;
+		Class<?> dbDataType;
+		for (FieldInfo field: fields) {
+			if (field.columnExists()) {
+				value = field.getValue(obj);
+				if (value!=null) {
+					dbDataType = DBUtil.getDataType(field.getColumn());
+					value = Convertor.translate(value, dbDataType);
+					colValues.put(field.getColumnName(), value);
+				}
+			}
+		}
+		dao.insert(table.getTableName(), colValues);	
+	}
+	
+}
