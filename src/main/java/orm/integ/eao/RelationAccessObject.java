@@ -72,8 +72,15 @@ public class RelationAccessObject extends TableHandler {
 		return true;
 	}	
 	
-	public RelationModel getModel(Relation rel) {
-		return TableModels.getModel(rel.getClass());
+	@SuppressWarnings("rawtypes")
+	public RelationModel getModel(Object rel) {
+		if (rel instanceof Class) {
+			return TableModels.getModel((Class)rel);
+		}
+		else if (rel instanceof Relation) {
+			return TableModels.getModel(rel.getClass());
+		}
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -81,6 +88,17 @@ public class RelationAccessObject extends TableHandler {
 		TabQuery query = buildQuery(rel);
 		RelationModel model = getModel(rel);
 		List<R> list = dao.query(query, new TableRowMapper(model));
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <R extends Relation> List<R> queryList(TabQuery query) {
+		if (query.getWhere().getWhereItems().size()==0) {
+			throw new IntegError("query's where can not be empty!");
+		}
+		String tabName = query.getTableName();
+		RelationModel relModel = TableModels.getByTableName(tabName);
+		List<R> list = dao.query(query, new TableRowMapper(relModel));
 		return list;
 	}
 	
@@ -204,5 +222,6 @@ public class RelationAccessObject extends TableHandler {
 		R  rel = newRelation(relClass, class1, id1, null);
 		return this.queryList(rel);
 	}
+	
 	
 }

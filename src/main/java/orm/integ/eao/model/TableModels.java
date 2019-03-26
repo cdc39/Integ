@@ -10,20 +10,21 @@ import java.util.Set;
 
 public class TableModels {
 
-	private static final Map<String, TableModel> ems = new HashMap<>();
-	//private static final Map<String, RelationModel> rms = new HashMap<>();
+	private static final Map<String, TableModel> models = new HashMap<>();
+	private static final Map<String, TableModel> tabNameModels = new HashMap<>();
 	
 	private static Map<String, List<FieldInfo>> fkMap = new HashMap<>(); 
 	
 	public static void putModel(TableModel model) {
 		if (model!=null) {
-			ems.put(model.getObjectClass().getName(), model);
+			models.put(model.getObjectClass().getName(), model);
+			tabNameModels.put(model.getFullTableName().toLowerCase(), model);
 		}
 	}
 
 	public static Collection<RelationModel> getRelationModels() {
 		Set<RelationModel> relModels = new HashSet<>();
-		for (TableModel tm: ems.values()) {
+		for (TableModel tm: models.values()) {
 			if (tm instanceof RelationModel) {
 				relModels.add((RelationModel) tm);
 			}
@@ -33,7 +34,7 @@ public class TableModels {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends TableModel> T getModel(Class<?> clazz) {
-		TableModel model = ems.get(clazz.getName());
+		TableModel model = models.get(clazz.getName());
 		if (model==null) {
 			System.out.println(clazz.getName()+" 没有注册TableModel");
 		}
@@ -51,7 +52,7 @@ public class TableModels {
 	
 	private static List<FieldInfo> scanForeignKeys(Class<? extends Entity> clazz) {
 		List<FieldInfo> fields = new ArrayList<>();
-		for (TableModel em: ems.values()) {
+		for (TableModel em: models.values()) {
 			for (FieldInfo field: em.fields) {
 				if (field.isForeignKey()) {
 					if (field.getMasterClass()==clazz) {
@@ -61,6 +62,14 @@ public class TableModels {
 			}
 		}
 		return fields;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends TableModel> T getByTableName(String tableName) {
+		if (tableName==null) {
+			return null;
+		}
+		return (T) tabNameModels.get(tableName.toLowerCase());
 	}
 	
 }

@@ -75,7 +75,7 @@ public class Eaos {
 		if (eao!=null) {
 			return eao.toRecords(list);
 		}
-		return null;
+		return new ArrayList<>();
 	}
 	
 	public static List<Record> toRecords(List<? extends Entity> list, String[] fields) {

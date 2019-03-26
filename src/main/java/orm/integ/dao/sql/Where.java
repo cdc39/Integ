@@ -77,7 +77,7 @@ public class Where {
 		}
 		else {
 			if (whereStmt.toLowerCase().trim().indexOf("where")!=0) {
-				whereStmt = " where "+whereStmt;
+				whereStmt = " where "+whereStmt+" ";
 			}
 		}
 		return whereStmt;
