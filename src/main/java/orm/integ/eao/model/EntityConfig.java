@@ -7,7 +7,7 @@ public interface EntityConfig {
 	public void setListFields(String... fields) ;
 	public void setDetailFields(String... fields) ;
 	public void setDetailFieldExcept(String... fields);
-	@SuppressWarnings("rawtypes")
-	public void setRelations(Class... classes);
-	
+	@SuppressWarnings("unchecked")
+	public void setRelations(Class<? extends Relation>... classes);
+
 }

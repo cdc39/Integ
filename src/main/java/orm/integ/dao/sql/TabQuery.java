@@ -4,6 +4,10 @@ public class TabQuery extends QueryRequest {
 	
 	private Where where = new Where();
 	
+	private TabQuery joinQuery;
+	
+	private String joinByField;
+	
 	public TabQuery() {
 	}
 	
@@ -43,5 +47,19 @@ public class TabQuery extends QueryRequest {
 		code = code*31 + order.hashCode();
 		return code;		
 	}
+
+	public void setJoinQuery(TabQuery joinQuery, String joinByField) {
+		this.joinByField = joinByField;
+		this.joinQuery = joinQuery;
+	}
+
+	public TabQuery getJoinQuery() {
+		return joinQuery;
+	}
+
+	public String getJoinByField() {
+		return joinByField;
+	}
+
 	
 }

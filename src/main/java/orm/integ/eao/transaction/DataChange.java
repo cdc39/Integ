@@ -6,6 +6,14 @@ import orm.integ.eao.model.Entity;
 
 public class DataChange {
 
+	public DataChange() {
+	}
+	
+	public DataChange(int changeType, Entity entity) {
+		this.type = changeType;
+		this.after = entity;
+	}
+
 	int type;
 	
 	Entity before;

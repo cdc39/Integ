@@ -167,9 +167,9 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		}
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setRelations(Class... classes) {
+	public void setRelations(Class<? extends Relation>... classes) {
 		this.relationClasses = classes;
 	}
 

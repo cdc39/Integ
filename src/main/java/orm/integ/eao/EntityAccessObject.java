@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.QueryRequest;
+import orm.integ.dao.sql.SqlQuery;
 import orm.integ.dao.sql.StatementAndValue;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.eao.cache.MemoryCache;
@@ -99,7 +100,20 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	public DataChangeListener[] getDataChangeListeners() {
 		return dataChangeListeners.toArray(new DataChangeListener[0]);
 	}
+	
+	public Query newQuery() {
+		return new Query(this);
+	}
 
+	public EntitySqlQuery newSqlQuery(StatementAndValue sql){
+		return new EntitySqlQuery(this, sql);
+	}
+	
+	public EntitySqlQuery newSqlQuery(String sql, Object...values) {
+		StatementAndValue stmt = new StatementAndValue(sql, values);
+		return new EntitySqlQuery(this, stmt);
+	}
+	
 	public T getById(Object id) {
 		if (id==null) {
 			return null;
@@ -167,26 +181,13 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return getAll(10000);
 	}
 	
-	protected T getFirst(List<T> list) {
-		return list==null||list.size()==0?null:list.get(0);
-	}
-	
-	public T queryFirst(QueryRequest req) {
+	T queryFirst(QueryRequest req) {
 		req.setPageInfo(1, 1);
 		List<T> list = this.query(req);
-		return this.getFirst(list);
-	}
-	
-	public T queryFirst(String where, String order, Object... values) {
-		TabQuery req = new TabQuery();
-		req.setPageInfo(1, 1);
-		req.addWhereItem(where, values);
-		req.setOrder(order);
-		return queryFirst(req);
-	}
-	
-	public T querySingle(String where, Object... values) {
-		return queryFirst(where, null, values);
+		if (list!=null && list.size()>0) {
+			return list.get(0);
+		}
+		return null;
 	}
 	
 	public void insert(T entity) {
@@ -218,10 +219,14 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return newId;
 	}
 	
-	public int queryCount(String whereStmt, Object... values) {
+	int queryCount(String whereStmt, Object... values) {
 		TabQuery tq = new TabQuery(em);
 		tq.addWhereItem(whereStmt, values);
-		return queryManager.queryCount(tq);
+		return queryCount(tq);
+	}
+	
+	int queryCount(QueryRequest query) {
+		return queryManager.queryCount(query);
 	}
 	
 	public void deleteById(Object id, boolean checkForeignUse) {
@@ -325,7 +330,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<T> query(QueryRequest req) {
+	List<T> query(QueryRequest req) {
 		req.setTableInfo(em);
 		if (req.getLast()<=QueryRequest.PAGE_QUERY_MAX_RETURN) {
 			List<String> ids = queryManager.queryIdList(req);
@@ -334,13 +339,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		else {
 			return dao.query(req, rowMapper);
 		}
-	}
-	
-	public List<T> query(String whereStmt, String orderStmt, Object... values) {
-		TabQuery query = new TabQuery();
-		query.addWhereItem(whereStmt, values);
-		query.setOrder(orderStmt);
-		return query(query);
 	}
 	
 	public List<T> queryByIds(List<String> ids) {
@@ -353,7 +351,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return list;
 	}
 	
-	public PageData pageQuery(QueryRequest req) {
+	PageData pageQuery(QueryRequest req) {
 		req.setTableInfo(em);
 		List<String> ids = queryManager.queryIdList(req);
 		
@@ -564,6 +562,46 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 			rel = rao.newRelation(class1, entityClass, id, id2);
 			setRelationValues(rec, rel);
 		}
+	}
+
+	public List<Record> queryWithRelation(TabQuery query, TabQuery relQuery) {
+		
+		if (!em.getFullTableName().equalsIgnoreCase(query.getTableName())) {
+			throw new IntegError("查询的表指定错误");
+		}
+		RelationModel relModel = TableModels.getByTableName(relQuery.getTableName());
+		if (relModel==null) {
+			throw new IntegError("找不到 "+relQuery.getTableName()+" 对应的关系模型");
+		}
+		FieldInfo keyField = relModel.getKeyField(em.getEntityClass());
+		if (keyField==null) {
+			throw new IntegError("不匹配的关系模型");
+		}
+		
+		String keyCol = query.getKeyColumn();
+		
+		StatementAndValue mainWhere = query.getWhere().toStatementAndValue("a");
+		StatementAndValue relWhere = relQuery.getWhere().toStatementAndValue("b");
+		Object[] values = StatementAndValue.unionValues(mainWhere, relWhere) ;
+		
+		String sql = "select "+keyCol + " from "+query.getTableName()+" a, "+relQuery.getTableName()+" b "
+		+ " where b."+keyCol+"=a."+keyCol
+		+ mainWhere.getStatement(true) + relWhere.getStatement(true);
+		SqlQuery sq = new SqlQuery(sql, values);
+		sq.setTableInfo(query.getTableName(), query.getKeyColumns());
+		
+		List<T> list = this.query(sq);
+		List<Record> records = this.toRecords(list, query.getViewFields());
+		List<Relation> relList = rao.queryList(relQuery);
+		this.setRelationValues(records, relList);
+		
+		return records;
+		
+	}
+
+	public void cleanCache() {
+		this.queryManager.clear();
+		this.cache.clear();
 	}
 	
 }

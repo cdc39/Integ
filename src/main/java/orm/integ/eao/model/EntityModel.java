@@ -32,6 +32,11 @@ public class EntityModel extends TableModel {
 		return fields;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public Class<? extends Entity> getEntityClass() {
+		return (Class<? extends Entity>) this.objectClass;
+	}
+	
 	public Class<? extends Relation>[] getRelationClasses() {
 		return this.relationClasses;
 	}

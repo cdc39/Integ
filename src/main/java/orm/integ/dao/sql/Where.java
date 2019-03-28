@@ -50,7 +50,6 @@ public class Where {
 		addItem(new StatementAndValue(whereStmt, values));
 	}
 	
-	
 	public String itemsToStatement() {
 		List<String> stmtList = new ArrayList<>();
 		if (whereItems.size()==1) {
@@ -86,6 +85,16 @@ public class Where {
 	public StatementAndValue toStatementAndValue() {
 		String where = this.itemsToStatement();
 		return new StatementAndValue(where, values);
+	}
+	
+	public StatementAndValue toStatementAndValue(String alias) {
+		StatementAndValue newItem;
+		Where where = new Where();
+		for (StatementAndValue item:whereItems) {
+			newItem = new StatementAndValue(alias+"."+item.getStatement(), item.getValues());
+			where.addItem(newItem);
+		}
+		return where.toStatementAndValue();
 	}
 	
 	private boolean isNull(String s) {

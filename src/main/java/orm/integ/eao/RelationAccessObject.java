@@ -53,6 +53,11 @@ public class RelationAccessObject extends TableHandler {
 		return list.size()==1?list.get(0):null;
 	}
 	
+	public <R extends Relation> R queryOrNew(R rel) {
+		List<R> list = queryList(rel);
+		return list.size()==1?list.get(0):rel;
+	}
+	
 	public boolean recordExists(Relation rel) {
 		TabQuery query = buildQuery(rel);
 		int count = dao.queryCount(query);
@@ -182,7 +187,7 @@ public class RelationAccessObject extends TableHandler {
 		
 	}
 
-	public <R extends Relation> R save(R rel) {
+	public <R extends Relation> R save(R rel, String[] updateFields) {
 		
 		if (rel==null) {
 			return null;
@@ -205,7 +210,7 @@ public class RelationAccessObject extends TableHandler {
 		Object value;
 		FieldInfo field;
 		
-		for (String name: rec.keySet()) {
+		for (String name: updateFields) {
 			field = model.getField(name);
 			value = rec.get(name);
 			if (value!=null && field!=null) {
