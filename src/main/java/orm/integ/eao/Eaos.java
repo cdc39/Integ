@@ -1,6 +1,7 @@
 package orm.integ.eao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,21 +12,22 @@ import orm.integ.eao.model.Record;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class Eaos {
 
-	static Map<String, EntityAccessObject> classNameEaos = new ConcurrentHashMap<>();
+	static Map<String, EntityAccessObject> eaos = new ConcurrentHashMap<>();
 
-	public static Map<String, EntityAccessObject> getAllEao() {
-		return classNameEaos;
+	public static Collection<EntityAccessObject> getAllEao() {
+		return eaos.values();
 	}
 	
 	public static void addEao(EntityAccessObject eao) {
-		classNameEaos.put(eao.getEntityModel().getObjectClass().getName(), eao);
+		String className = eao.getEntityModel().getObjectClass().getName();
+		eaos.put(className, eao);
 	}
 	
 	public static EntityAccessObject getEao(Class clazz) {
 		if (clazz==null) {
 			return null;
 		}
-		return classNameEaos.get(clazz.getName());
+		return eaos.get(clazz.getName());
 	}
 	
 	public static EntityAccessObject getEao(Entity entity) {

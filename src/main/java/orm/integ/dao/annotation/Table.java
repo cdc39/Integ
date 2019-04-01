@@ -13,7 +13,7 @@ public @interface Table {
 	
 	String schema() default "";
 	
-	int keyLength() default 12;
+	int keyLength() default 10;
 
 	String keyColumn() default "";
 	

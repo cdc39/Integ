@@ -166,7 +166,16 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	protected void putToCache(T entity) {
 		if (entity!=null) {
 			cache.put(entity);
+			fillSolidMappingFields(entity);
 			adapter.fillExtendFields(entity);
+		}
+	}
+
+	private void fillSolidMappingFields(T entity) {
+		for (FieldInfo field: em.getFields()) {
+			if (field.isMapping() && field.isNormal()) {
+				this.getFieldValue(entity, field, true);
+			}
 		}
 	}
 
@@ -336,8 +345,15 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 			List<String> ids = queryManager.queryIdList(req);
 			return this.getByIds(ids);
 		}
-		else {
-			return dao.query(req, rowMapper);
+		else 
+		{
+			List<T> list = dao.query(req, rowMapper);
+			if (list.size()<20000) {
+				for (T en: list) {
+					this.putToCache(en);
+				}
+			}
+			return list;
 		}
 	}
 	
