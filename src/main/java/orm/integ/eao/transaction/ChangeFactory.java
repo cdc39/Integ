@@ -10,26 +10,15 @@ import orm.integ.utils.ObjectHandler;
 public class ChangeFactory {
 
 	public static DataChange newUpdate(Entity before, Entity after) {
-		DataChange dc = new DataChange();
-		dc.type = ChangeTypes.UPDATE;
-		dc.before = (before);
-		dc.after = after;
-		//dc.fieldChanges = findDifferents(before, after);
-		return dc;
+		return new DataChange(ChangeTypes.UPDATE, before, after);
 	}
 	
 	public static DataChange newInsert(Entity entity) {
-		DataChange dc = new DataChange();
-		dc.type = ChangeTypes.INSERT;
-		dc.after = entity;
-		return dc;
+		return new DataChange(ChangeTypes.INSERT, null, entity);
 	}
 	
 	public static DataChange newDelete(Entity entity) {
-		DataChange dc = new DataChange();
-		dc.type = ChangeTypes.DELETE;
-		dc.before = entity;
-		return dc;
+		return new DataChange(ChangeTypes.DELETE, entity, null);
 	}
 	
 	public static List<FieldChange> findDifferents(Object before, Object after) {
@@ -56,12 +45,4 @@ public class ChangeFactory {
 		return changes;
 	}
 
-	@SuppressWarnings("rawtypes")
-	public static DataChange newDeleteBatch(List list) {
-		DataChange change = new DataChange();
-		change.type = ChangeTypes.BATCH_DELETE;
-		change.list = list;
-		return change;
-	}
-	
 }

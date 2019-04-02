@@ -516,29 +516,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		}
 	}
 
-	public void delete(String where, Object[] values, boolean checkForeignUse) {
-		TabQuery query = new TabQuery(em);
-		query.addWhereItem(where, values);
-		queryManager.clear();
-		List<String> ids = queryManager.queryIdList(query);
-		List<T> list = query(query);
-		if (checkForeignUse) {
-			for (String id: ids) {
-				testForienUseBeforeDelete(id);
-			}
-		}
-		dao.delete(query);
-		afterChange(ChangeFactory.newDeleteBatch(list));
-	}
-	
-	public void batchInsert(List<T> list) {
-		if (list!=null) {
-			for (T entity:list) {
-				this.insert(entity);
-			}
-		}
-	}
-	
 	private void afterChange(DataChange change) {
 		TransactionManager.afterChange(change, dataChangeListeners);
 	}

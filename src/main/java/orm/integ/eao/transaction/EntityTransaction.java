@@ -31,9 +31,6 @@ public class EntityTransaction extends Transaction  {
 		else if (change.getType()==ChangeTypes.UPDATE) {
 			eao.update(change.getBefore());
 		}
-		else if (change.getType()==ChangeTypes.BATCH_DELETE) {
-			eao.batchInsert(change.getList());
-		}
 	}
 	
 	@Override

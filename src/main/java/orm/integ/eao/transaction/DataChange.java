@@ -6,22 +6,19 @@ import orm.integ.eao.model.Entity;
 
 public class DataChange {
 
-	public DataChange() {
-	}
-	
-	public DataChange(int changeType, Entity entity) {
+	public DataChange(int changeType, Entity before, Entity after) {
 		this.type = changeType;
-		this.after = entity;
+		this.before = before;
+		this.after = after;
+		this.entity = after!=null?after:before;
+		this.entityClass = entity.getClass();
 	}
 
-	int type;
-	
-	Entity before;
-
-	Entity after;
-	
-	@SuppressWarnings("rawtypes")
-	List list;
+	final int type;
+	final Entity before;
+	final Entity after;
+	final Entity entity;
+	final Class<? extends Entity> entityClass;
 	
 	private FieldChange[] fieldChanges;
 	
@@ -41,16 +38,11 @@ public class DataChange {
 
 	@SuppressWarnings("unchecked")
 	public <E extends Entity> E getEntity() {
-		if (after!=null) {
-			return (E) after;
-		}
-		else if (before!=null){
-			return (E) before;
-		}
-		else if (list!=null && list.size()>0) {
-			return (E) list.get(0);
-		}
-		return null;
+		return (E) entity;
+	}
+	
+	public Class<? extends Entity> getEntityClass() {
+		return entityClass;
 	}
 
 	public FieldChange[] getFieldChanges() {
@@ -78,11 +70,6 @@ public class DataChange {
 			}
 		}
 		return false;
-	}
-
-	@SuppressWarnings("rawtypes")
-	public List getList() {
-		return list;
 	}
 
 }

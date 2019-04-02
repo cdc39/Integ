@@ -171,9 +171,11 @@ public class DataAccessObject {
 	}
 	
 	private void date2Timestamp(Object[] values) {
-		for (int i=0; i<values.length; i++) {
-			if (values[i] instanceof Date) {
-				values[i] = Convertor.toTimestamp((Date)values[i]);
+		if (values!=null) {
+			for (int i=0; i<values.length; i++) {
+				if (values[i] instanceof Date) {
+					values[i] = Convertor.toTimestamp((Date)values[i]);
+				}
 			}
 		}
 	}
@@ -430,10 +432,15 @@ public class DataAccessObject {
 		return executeSql(sql, req.getValues());
 	}
 	
-	public void delete(TabQuery query) {
-		String whereStmt = query.getWhere().toString();
-		String sql = "delete from "+query.getTableName()+" "+whereStmt;
-		executeSql(sql, query.getValues());
+	public int delete(String tableName, Where where) {
+		String whereStmt = where==null?"":where.toString();
+		Object[] values = where==null?null:where.getValues();
+		String sql = "delete from "+tableName+whereStmt;
+		return executeSql(sql, values);
+	}
+	public int delete(String tableName, String where, Object...values) {
+		Where w = new Where(where, values);
+		return delete(tableName, w);
 	}
 
 	public boolean isNull(String s) {
