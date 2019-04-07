@@ -1,6 +1,7 @@
 package orm.integ.eao.transaction;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import orm.integ.eao.model.Entity;
@@ -26,7 +27,9 @@ public class ChangeFactory {
 		if (before==null || after==null || before.getClass()!=after.getClass()) {
 			return changes;
 		}
-		String[] fields = ClassAnalyzer.get(before).getNormalFields();
+		ClassAnalyzer ca = ClassAnalyzer.get(before);
+		String[] fields = ca.getNormalFields();
+		
 		Object v1, v2;
 		ObjectHandler obh1 = new ObjectHandler(before);
 		ObjectHandler obh2 = new ObjectHandler(after);
@@ -34,7 +37,7 @@ public class ChangeFactory {
 		for (String field:fields) {
 			v1 = obh1.getValue(field);
 			v2 = obh2.getValue(field);
-			if ((v1==null && v2!=null) || (v1!=null && !v1.equals(v2))) {
+			if (!equals(v1, v2)) {
 				change = new FieldChange();
 				change.setFieldName(field);
 				change.setBeforeValue(v1);
@@ -45,4 +48,31 @@ public class ChangeFactory {
 		return changes;
 	}
 
+	public static boolean equals(Object v1, Object v2) {
+		if (v1==null) {
+			if (v2==null) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		if (v2==null) {
+			return false;
+		}
+		if (v1==v2) {
+			return true;
+		}
+		if (v1 instanceof Date) {
+			Date d1 = (Date)v1;
+			Date d2 = (Date)v2;
+			int dis = (int) (d1.getTime()/1000 - d2.getTime()/1000);
+			return dis==0;
+		}
+		if (v1.getClass()!=v2.getClass()) {
+			return false;
+		}
+		return v1.equals(v2);
+	}
+	
 }

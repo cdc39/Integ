@@ -240,6 +240,10 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	
 	public void deleteById(Object id, boolean checkForeignUse) {
 		T entity = this.getById(id);
+		if (entity==null) {
+			System.out.println("entity is null!");
+			return;
+		}
 		if (checkForeignUse) {
 			testForienUseBeforeDelete(id);
 		}

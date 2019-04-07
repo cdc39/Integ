@@ -19,6 +19,7 @@ import orm.integ.eao.model.TableModel;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.FieldChange;
 import orm.integ.utils.Convertor;
+import orm.integ.utils.MyLogger;
 
 public class TableHandler {
 
@@ -77,17 +78,23 @@ public class TableHandler {
 		Object value;
 		FieldInfo field ;
 		Map<String, Object> updateFields = new HashMap<String, Object>();
-
+		List<String> lines = new ArrayList<>();
+		String va, vb;
 		for(FieldChange fc:fieldChanges) {
 			fieldName = fc.getFieldName();
 			field = model.getField(fieldName);
 			if (field!=null && field.columnExists()) {
+				vb = Convertor.toString(fc.getBeforeValue());
+				va = Convertor.toString(fc.getAfterValue());
+				lines.add(fieldName+":"+vb+"->"+va);
 				fields.add(fieldName);
 				colName = field.getColumnName();
 				value = field.getValue(now);
 				updateFields.put(colName, value);
 			}
 		}
+		String className = model.getObjectClass().getSimpleName();
+		MyLogger.print(className+" entity changed", lines, ";  ");
 		return updateFields;
 	}
 	
