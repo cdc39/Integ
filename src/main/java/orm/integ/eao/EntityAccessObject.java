@@ -241,7 +241,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	public void deleteById(Object id, boolean checkForeignUse) {
 		T entity = this.getById(id);
 		if (entity==null) {
-			System.out.println("entity is null!");
+			MyLogger.print("entity is null!");
 			return;
 		}
 		if (checkForeignUse) {
@@ -403,6 +403,10 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	
 	public Record toDetailRecord(T entity) {
 		return toRecord(entity, em.getDetailFields());
+	}
+	
+	public Record toListRecord(T entity) {
+		return toRecord(entity, em.getListFields());
 	}
 	
 	Map<Class<? extends Entity>, Set<Object>> getForeignIds(List<T> list) {

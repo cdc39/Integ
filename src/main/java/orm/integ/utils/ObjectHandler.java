@@ -136,7 +136,7 @@ public class ObjectHandler {
 	public Map<String, Object> getValues(boolean includeNull) {
 		return getValues(ca.getNormalFields(), includeNull);
 	}
-
+	
 	public Map<String, Object> getValues(String[] fields, boolean includeNull) {
 		Map<String, Object> values = new HashMap<>();
 		Object value;
@@ -148,7 +148,7 @@ public class ObjectHandler {
 		}
 		return values;
 	}
-
+	
 	public Object getObject() {
 		return this.object;
 	}

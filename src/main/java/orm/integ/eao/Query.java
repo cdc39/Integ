@@ -2,19 +2,12 @@ package orm.integ.eao;
 
 import java.util.List;
 
-import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.dao.sql.Where;
 import orm.integ.eao.model.Entity;
-import orm.integ.eao.model.EntityModel;
-import orm.integ.eao.model.PageData;
 
-public class Query implements QueryHandler {
+public class Query extends QueryHandler {
 
-	@SuppressWarnings("rawtypes")
-	EntityAccessObject eao ;
-	DataAccessObject dao;
-	EntityModel model;
 	TabQuery tabQuery;
 	
 	public Query(Class<? extends Entity> clazz) {
@@ -23,16 +16,16 @@ public class Query implements QueryHandler {
 	
 	@SuppressWarnings("rawtypes")
 	Query(EntityAccessObject eao) {
-		this.eao = eao;
-		dao = eao.getDAO();
-		model = eao.getEntityModel();
+		super(eao);
 		tabQuery = new TabQuery(model);
+		setQueryRequest(tabQuery);
 	}
 
 	public Query addWhere(String whereStmt, Object... values) {
 		tabQuery.addWhereItem(whereStmt, values);
 		return this;
 	}
+	
 	public Query setWhere(Where where) {
 		tabQuery.setWhere(where);
 		return this;
@@ -40,11 +33,6 @@ public class Query implements QueryHandler {
 	
 	public Query setOrder(String order) {
 		tabQuery.setOrder(order);
-		return this;
-	}
-	
-	public Query setPageInfo(int start, int limit) {
-		tabQuery.setPageInfo(start, limit);
 		return this;
 	}
 	
@@ -65,9 +53,5 @@ public class Query implements QueryHandler {
 		return eao.query(tabQuery);
 	}
 
-	@Override
-	public PageData page() {
-		return eao.pageQuery(tabQuery);
-	}
 	
 }

@@ -64,6 +64,14 @@ public class Eaos {
 		return null;
 	}
 	
+	public static Record toListRecord(Entity entity) {
+		EntityAccessObject eao = getEao(entity);
+		if (eao!=null) {
+			return eao.toListRecord(entity);
+		}
+		return null;
+	}
+	
 	public static Record toRecord(Entity entity, String[] fields) {
 		EntityAccessObject eao = getEao(entity.getClass());
 		if (eao!=null) {
@@ -73,11 +81,30 @@ public class Eaos {
 	}
 	
 	public static List<Record> toRecords(List<? extends Entity> list) {
-		EntityAccessObject eao = getEao(list);
-		if (eao!=null) {
-			return eao.toRecords(list);
+		return toRecords(list, true);
+	}
+	
+	public static List<Record> toRecords(List<? extends Entity> list, boolean sameClsss) {
+		EntityAccessObject eao;
+		List<Record> rtList = new ArrayList<>();
+		if (sameClsss) {
+			eao = getEao(list);
+			if (eao!=null) {
+				return eao.toRecords(list);
+			}
 		}
-		return new ArrayList<>();
+		else {
+			Record rec;
+			for (Entity en: list) {
+				eao = getEao(en);
+				if (eao!=null) {
+					rec = eao.toListRecord(en);
+					rec.put("_class", en.getClass().getSimpleName());
+					rtList.add(rec);
+				}
+			}
+		}
+		return rtList;
 	}
 	
 	public static List<Record> toRecords(List<? extends Entity> list, String[] fields) {

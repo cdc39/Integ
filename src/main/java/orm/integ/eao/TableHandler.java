@@ -64,7 +64,13 @@ public class TableHandler {
 			colName = metaData.getColumnName(i);
 			field = model.getField(colName);
 			if (field!=null) {
-				value = rset.getObject(i);
+				if (field.getField().getType()==int.class) {
+					value = rset.getInt(i);
+				}
+				else {
+				// 2019-04-18 MySQL当字段类型为 tinyint(1) 时, rset.getObject(i) 返回 Boolean, 奇怪
+					value = rset.getObject(i);
+				}
 				field.setValue(object, value);
 			}
 		}
