@@ -17,13 +17,9 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 	private String[] defaultDetailFields;
 	
 	private Set<String> detailExceptFields = new HashSet<>();
-	private Class<? extends Relation>[] relationClasses ;
-	private DataAccessObject dao;
 	
 	public EntityModelBuilder(Class<? extends Entity> entityClass, DataAccessObject dao) {
 		super(entityClass, dao);
-		
-		this.dao = dao;
 		
 		tableKeyName = getTableKeyName();
 		
@@ -63,13 +59,6 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		}
 		
 		TableModels.putModel(model);
-		
-		if (relationClasses!=null) {
-			for (Class<? extends Relation> rc: relationClasses) {
-				new RelationModelBuilder(rc, dao).buildModel();
-			}
-		}
-		model.relationClasses = relationClasses;
 		
 		return model;
 	}
@@ -165,12 +154,6 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		for (String f: fields) {
 			detailExceptFields.add(f);
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void setRelations(Class<? extends Relation>... classes) {
-		this.relationClasses = classes;
 	}
 
 }

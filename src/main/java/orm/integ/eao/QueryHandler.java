@@ -3,11 +3,13 @@ package orm.integ.eao;
 import java.util.List;
 
 import orm.integ.dao.DataAccessObject;
+import orm.integ.dao.sql.PageRequest;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.eao.model.Entity;
 import orm.integ.eao.model.EntityModel;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
+import orm.integ.eao.model.RecordExtender;
 
 public abstract class QueryHandler {
 
@@ -15,7 +17,7 @@ public abstract class QueryHandler {
 	EntityAccessObject eao ;
 	DataAccessObject dao;
 	EntityModel model;
-	RecordExtender filler;
+	RecordExtender extender;
 	QueryRequest query;
 	
 	@SuppressWarnings("rawtypes")
@@ -35,13 +37,18 @@ public abstract class QueryHandler {
 		return this;
 	}
 	
+	public QueryHandler setPageInfo(PageRequest req) {
+		query.setPageInfo(req.getStart(), req.getLimit());
+		return this;
+	}
+	
 	public QueryHandler setFields(String... fields) {
 		query.setViewFields(fields);
 		return this;
 	}
 	
-	public QueryHandler setRecordFiller(RecordExtender filler) {
-		this.filler = filler;
+	public QueryHandler setRecordExtender(RecordExtender extender) {
+		this.extender = extender;
 		return this;
 	}
 
@@ -67,9 +74,14 @@ public abstract class QueryHandler {
 	}
 	
 	protected void fillExtendValues(List<Record> recs) {
-		if (filler!=null) {
+		if (extender!=null) {
 			for (Record r: recs) {
-				filler.fillRecordExt(r);
+				try {
+					extender.fillRecordExt(r);
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

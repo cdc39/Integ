@@ -14,7 +14,6 @@ public abstract class EntityAccessService<T extends Entity> extends EaoAdapter<T
 
 	protected EntityAccessObject<T> eao;
 	protected DataAccessObject dao;
-	protected RelationAccessObject rao;
 	protected EntityModel em;
 	protected final List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 	
@@ -22,7 +21,6 @@ public abstract class EntityAccessService<T extends Entity> extends EaoAdapter<T
 		eao = new EntityAccessObject<T>(this);
 		dao = this.getDao();
 		this.em = eao.getEntityModel();
-		rao = new RelationAccessObject(dao);
 		
 		if (this instanceof DataChangeListener) {
 			dataChangeListeners.add((DataChangeListener) this);

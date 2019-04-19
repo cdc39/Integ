@@ -6,7 +6,6 @@ public class EntityModel extends TableModel {
 	String keyColumn;
 	String[] listFields;
 	String[] detailFields;
-	Class<? extends Relation>[] relationClasses;
 	
 	public String getKeyColumn() {
 		return keyColumn;
@@ -35,10 +34,6 @@ public class EntityModel extends TableModel {
 	@SuppressWarnings("unchecked")
 	public Class<? extends Entity> getEntityClass() {
 		return (Class<? extends Entity>) this.objectClass;
-	}
-	
-	public Class<? extends Relation>[] getRelationClasses() {
-		return this.relationClasses;
 	}
 	
 }

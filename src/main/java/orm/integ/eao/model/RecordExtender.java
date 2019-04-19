@@ -1,6 +1,4 @@
-package orm.integ.eao;
-
-import orm.integ.eao.model.Record;
+package orm.integ.eao.model;
 
 public interface RecordExtender {
 

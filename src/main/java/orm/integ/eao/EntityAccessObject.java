@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.QueryRequest;
-import orm.integ.dao.sql.SqlQuery;
 import orm.integ.dao.sql.StatementAndValue;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.eao.cache.MemoryCache;
@@ -31,8 +30,6 @@ import orm.integ.eao.model.ForeignUse;
 import orm.integ.eao.model.FromOrmHelper;
 import orm.integ.eao.model.PageData;
 import orm.integ.eao.model.Record;
-import orm.integ.eao.model.Relation;
-import orm.integ.eao.model.RelationModel;
 import orm.integ.eao.model.TableModels;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.DataChange;
@@ -53,7 +50,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	private final NoExistsCache notExistsCache = new NoExistsCache();
 	private final QueryManager<T> queryManager ;
 	private final List<DataChangeListener> dataChangeListeners = new ArrayList<>();
-	private final RelationAccessObject rao;
 	
 	@SuppressWarnings("unchecked")
 	public EntityAccessObject(EaoAdapter<T> adapter) {
@@ -62,7 +58,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		
 		this.adapter = adapter;
 		this.dao = adapter.getDao();
-		this.rao = new RelationAccessObject(dao);
 		
         Type t = adapter.getClass().getGenericSuperclass();
         Type[] ts = ((ParameterizedType) t).getActualTypeArguments();
@@ -528,78 +523,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		TransactionManager.afterChange(change, dataChangeListeners);
 	}
 	
-	public void setRelationValues(List<Record> list, List<? extends Relation> rels) {
-		if (list==null || rels==null || rels.size()==0) {
-			return;
-		}
-		RelationModel relModel = TableModels.getModel(rels.get(0).getClass());
-		FieldInfo keyField = relModel.getKeyField(entityClass);
-		Object id, id2;
-		for (Record rec: list) {
-			id = rec.get("id").toString();
-			for (Relation rel: rels) {
-				id2 = keyField.getValue(rel).toString();
-				if (id2.equals(id)) {
-					setRelationValues(rec, rel);
-				}
-			}
-		}
-	}
-	
-	public void setRelationValues(Record record, Relation rel) {
-		if (record==null || rel==null) {
-			return;
-		}
-		RelationModel relModel = TableModels.getModel(rel.getClass());
-		Record relRec = rao.toRecordNoKey(rel);
-		record.put(relModel.getFieldPrefix(), relRec);
-	}
-
-	public void setRelationValues(List<Record> recs, Class<? extends Relation> class1, String id2) {
-		String id;
-		Relation rel;
-		for (Record rec: recs) {
-			id = rec.getString("id");
-			rel = rao.newRelation(class1, entityClass, id, id2);
-			setRelationValues(rec, rel);
-		}
-	}
-
-	public List<Record> queryWithRelation(TabQuery query, TabQuery relQuery) {
-		
-		if (!em.getFullTableName().equalsIgnoreCase(query.getTableName())) {
-			throw new IntegError("查询的表指定错误");
-		}
-		RelationModel relModel = TableModels.getByTableName(relQuery.getTableName());
-		if (relModel==null) {
-			throw new IntegError("找不到 "+relQuery.getTableName()+" 对应的关系模型");
-		}
-		FieldInfo keyField = relModel.getKeyField(em.getEntityClass());
-		if (keyField==null) {
-			throw new IntegError("不匹配的关系模型");
-		}
-		
-		String keyCol = query.getKeyColumn();
-		
-		StatementAndValue mainWhere = query.getWhere().toStatementAndValue("a");
-		StatementAndValue relWhere = relQuery.getWhere().toStatementAndValue("b");
-		Object[] values = StatementAndValue.unionValues(mainWhere, relWhere) ;
-		
-		String sql = "select "+keyCol + " from "+query.getTableName()+" a, "+relQuery.getTableName()+" b "
-		+ " where b."+keyCol+"=a."+keyCol
-		+ mainWhere.getStatement(true) + relWhere.getStatement(true);
-		SqlQuery sq = new SqlQuery(sql, values);
-		sq.setTableInfo(query.getTableName(), query.getKeyColumns());
-		
-		List<T> list = this.query(sq);
-		List<Record> records = this.toRecords(list, query.getViewFields());
-		List<Relation> relList = rao.queryList(relQuery);
-		this.setRelationValues(records, relList);
-		
-		return records;
-		
-	}
-
 	public void cleanCache() {
 		this.queryManager.clear();
 		this.cache.clear();
