@@ -2,7 +2,7 @@ package orm.integ.dao.sql;
 
 import orm.integ.utils.StringUtils;
 
-public abstract class QueryRequest implements Cloneable {
+public abstract class QueryRequest implements Cloneable, PageRequest {
 
 	public static final int PAGE_QUERY_MAX_RETURN = 2000;
 	
@@ -65,6 +65,7 @@ public abstract class QueryRequest implements Cloneable {
 		return keyColumns;
 	}
 	
+	@Override
 	public int getStart() {
 		return start;
 	}
@@ -76,7 +77,12 @@ public abstract class QueryRequest implements Cloneable {
 		this.start = start;
 		this.limit = limit;
 	}
+	
+	public void setPageInfo(PageRequest pr) {
+		setPageInfo(pr.getStart(), pr.getLimit());
+	}
 
+	@Override
 	public int getLimit() {
 		return limit;
 	}

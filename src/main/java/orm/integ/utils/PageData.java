@@ -1,4 +1,4 @@
-package orm.integ.eao.model;
+package orm.integ.utils;
 
 import java.util.List;
 

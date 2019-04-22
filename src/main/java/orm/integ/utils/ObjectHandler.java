@@ -40,6 +40,12 @@ public class ObjectHandler {
 		return null;
 	}
 	
+	public static Record toRecord(Object obj) {
+		Map<String, Object> values = new ObjectHandler(obj).getValues(false);
+		Record rec = new Record();
+		rec.putAll(values);
+		return rec;
+	}
 	
 	private Object object;
 	private ClassAnalyzer ca;
@@ -149,6 +155,8 @@ public class ObjectHandler {
 		return values;
 	}
 	
+
+	
 	public Object getObject() {
 		return this.object;
 	}
@@ -164,7 +172,5 @@ public class ObjectHandler {
 		Map<String, Object> values = obh.getValues(fields, true);
 		this.setValues(values);
 	}
-
-
 	
 }

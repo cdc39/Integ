@@ -1,7 +1,5 @@
 package orm.integ.eao;
 
-import java.util.List;
-
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.dao.sql.Where;
 import orm.integ.eao.model.Entity;
@@ -36,22 +34,5 @@ public class Query extends QueryHandler {
 		return this;
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> E first() {
-		return (E) eao.queryFirst(tabQuery);
-	}
-	
-	@Override
-	public int count() {
-		return eao.queryCount(tabQuery); 
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@Override
-	public List list() {
-		return eao.query(tabQuery);
-	}
-
 	
 }

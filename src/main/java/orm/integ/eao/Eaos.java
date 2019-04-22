@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import orm.integ.eao.model.Entity;
-import orm.integ.eao.model.Record;
+import orm.integ.utils.Record;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class Eaos {
@@ -84,10 +84,10 @@ public class Eaos {
 		return toRecords(list, true);
 	}
 	
-	public static List<Record> toRecords(List<? extends Entity> list, boolean sameClsss) {
+	public static List<Record> toRecords(List<? extends Entity> list, boolean sameClass) {
 		EntityAccessObject eao;
 		List<Record> rtList = new ArrayList<>();
-		if (sameClsss) {
+		if (sameClass) {
 			eao = getEao(list);
 			if (eao!=null) {
 				return eao.toRecords(list);

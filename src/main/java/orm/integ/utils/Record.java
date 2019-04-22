@@ -1,4 +1,4 @@
-package orm.integ.eao.model;
+package orm.integ.utils;
 
 import java.util.HashMap;
 
@@ -9,6 +9,11 @@ public class Record extends HashMap<String, Object> {
 	public String getString(String name) {
 		Object value = this.get(name);
 		return value==null?null:value.toString();
+	}
+
+	public boolean getBool(String name) {
+		Object value = this.get(name);
+		return value==null?false:Convertor.toBool(value);
 	}
 	
 }

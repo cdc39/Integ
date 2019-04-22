@@ -135,6 +135,14 @@ public class StringUtils {
 		return s;
 	}
 	
+	public static String firstCharToLower(String s) {
+		if (s==null || s.length()==0) {
+			return s;
+		}
+		String first = s.substring(0,1);
+		return first.toLowerCase()+s.substring(1);
+	}
+	
 	public static boolean inArray(String s, String[] array) {
 		if (s==null) {
 			return false;

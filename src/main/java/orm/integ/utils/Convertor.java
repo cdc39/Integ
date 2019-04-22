@@ -247,8 +247,9 @@ public class Convertor {
 		return new Timestamp(date.getTime());
 	}
 	
-	public static boolean toBool(String s) {
-		if (s!=null) {
+	public static boolean toBool(Object obj) {
+		if (obj!=null) {
+			String s = toString(obj);
 			s = s.trim().toLowerCase();
 			if (s.equals("1") 
 					|| s.equals("t") ||s.equals("true")

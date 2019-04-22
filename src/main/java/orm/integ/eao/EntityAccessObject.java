@@ -28,8 +28,6 @@ import orm.integ.eao.model.FieldInfo;
 import orm.integ.eao.model.FieldMapping;
 import orm.integ.eao.model.ForeignUse;
 import orm.integ.eao.model.FromOrmHelper;
-import orm.integ.eao.model.PageData;
-import orm.integ.eao.model.Record;
 import orm.integ.eao.model.TableModels;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.DataChange;
@@ -37,6 +35,8 @@ import orm.integ.eao.transaction.DataChangeListener;
 import orm.integ.eao.transaction.TransactionManager;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
+import orm.integ.utils.PageData;
+import orm.integ.utils.Record;
 
 public class EntityAccessObject<T extends Entity> extends TableHandler {
 
@@ -383,6 +383,9 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	}
 	
 	public Record toRecord(T entity, String[] viewFields) {
+		if (entity==null) {
+			return null;
+		}
 		Object value;
 		Record record = new Record();
 		FieldInfo field;

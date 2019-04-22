@@ -1,5 +1,6 @@
 package orm.integ.eao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import orm.integ.dao.DataAccessObject;
@@ -7,9 +8,8 @@ import orm.integ.dao.sql.PageRequest;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.eao.model.Entity;
 import orm.integ.eao.model.EntityModel;
-import orm.integ.eao.model.PageData;
-import orm.integ.eao.model.Record;
-import orm.integ.eao.model.RecordExtender;
+import orm.integ.utils.PageData;
+import orm.integ.utils.Record;
 
 public abstract class QueryHandler {
 
@@ -73,16 +73,31 @@ public abstract class QueryHandler {
 		return page;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public List<String> idList() {
+		List<Entity> list = eao.query(query);
+		List<String> ids = new ArrayList<>();
+		for (Entity en: list) {
+			ids.add(en.getId());
+		}
+		return ids;
+	}
+	
 	protected void fillExtendValues(List<Record> recs) {
 		if (extender!=null) {
-			for (Record r: recs) {
+			List<Record> removes = new ArrayList<>();
+			for (Record r: recs) { 
 				try {
-					extender.fillRecordExt(r);
+					boolean rt = extender.fillRecordExt(r);
+					if (!rt) {
+						removes.add(r);
+					}
 				}
 				catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
+			recs.removeAll(removes);
 		}
 	}
 	
@@ -94,6 +109,12 @@ public abstract class QueryHandler {
 		return recList;
 	}
 	
-
+	@SuppressWarnings("rawtypes")
+	public void forEach(EntityHandler handler) {
+		List list = this.list();
+		for (Object obj: list) {
+			handler.handle((Entity)obj, eao);
+		}
+	}
 	
 }

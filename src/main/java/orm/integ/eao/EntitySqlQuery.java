@@ -9,7 +9,8 @@ public class EntitySqlQuery extends QueryHandler {
 	SqlQuery sqlQuery;
 	
 	public EntitySqlQuery(Class<? extends Entity> entityClass, StatementAndValue sql) {
-		super(Eaos.getEao(entityClass));
+		this(Eaos.getEao(entityClass), sql);
+		
 	}
 	
 	@SuppressWarnings("rawtypes")
