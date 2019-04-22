@@ -2,7 +2,9 @@ package orm.integ.utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -45,6 +47,19 @@ public class ObjectHandler {
 		Record rec = new Record();
 		rec.putAll(values);
 		return rec;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static List<Record> toRecordList(List list) {
+		List<Record> rtlist = new ArrayList<>();
+		Record rec;
+		for (Object obj: list) {
+			if (obj!=null) {
+				rec = toRecord(obj);
+				rtlist.add(rec);
+			}
+		}
+		return rtlist;
 	}
 	
 	private Object object;

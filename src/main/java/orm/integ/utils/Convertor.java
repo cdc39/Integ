@@ -169,7 +169,12 @@ public class Convertor {
 		}
 		else if (value instanceof String) {
 			if (!value.equals("")) {
-				d = new Double((String)value);
+				try {
+					d = new Double((String)value);
+				}
+				catch(Exception e) {
+					return null;
+				}
 			}
 		}
 		else if (value instanceof Float) {
