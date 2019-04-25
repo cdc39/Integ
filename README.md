@@ -98,7 +98,7 @@ public class StudentService extends EntityAccessService<Student> {
 		// 修改
 		st = eao.getById("s1");
 		st.setName("小华");
-		eao.update(st, "name");
+		eao.update(st);
 		
 		// 删除
 		eao.deleteById("s1");
@@ -108,22 +108,19 @@ public class StudentService extends EntityAccessService<Student> {
 	public void testQuery() {
 
 		// 单表模式化查询
-		TabQuery req = new TabQuery();
-		req.addWhereItem("school_class_id=?", 1);
-		List<Student> list1 = eao.query(req);
-
+		List<Student> list1 = eao.newQuery()
+			.addEqual("school_class_id",1)
+			.addLike("student_name","张");
+			.setOrder("student_id").list();
+		
 		// 自由SQL查询
-		SqlQuery sqlReq = new SqlQuery("select * from tb_student where student_id=?", "s1");
-		List<Student> list2 = eao.query(sqlReq);
+		List<Student> list2 = eao.newSqlQuery("select student_id from tb_student where student_id=?", "s1").list();
 
 		// 查询记录数
-		int count = eao.queryCount("school_class_id=?", 1);
+		int count = eao.newQuery().where("school_class_id=?", 1).count();
 
 		// 分页查询
-		TabQuery tq = new TabQuery();
-		tq.addWhereItem("school_class_id=?", 1);
-		tq.setPageInfo(21, 10);  // 从第21行开始，查询10行
-		PageData page = eao.pageQuery(tq);		
+		PageData page = eao.newQuery().where("school_class_id=?", 1).setPageInfo(21,10).page();
 		
 	}
 	
