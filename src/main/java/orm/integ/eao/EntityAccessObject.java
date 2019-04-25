@@ -96,8 +96,8 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return dataChangeListeners.toArray(new DataChangeListener[0]);
 	}
 	
-	public Query newQuery() {
-		return new Query(this);
+	public EntityQuery newQuery() {
+		return new EntityQuery(this);
 	}
 
 	public EntitySqlQuery newSqlQuery(StatementAndValue sql){

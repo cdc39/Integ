@@ -117,4 +117,11 @@ public abstract class QueryHandler {
 		}
 	}
 	
+	public boolean exists() {
+		return this.count()>0;
+	}
+	
+	
 }
+
+

@@ -52,6 +52,16 @@ public class DataChange {
 		}
 		return fieldChanges;
 	}
+	
+	public FieldChange getFieldChange(String fieldName) {
+		FieldChange[] fcs = getFieldChanges();
+		for (FieldChange fc: fcs) {
+			if (fc.getFieldName().equals(fieldName)) {
+				return fc;
+			}
+		}
+		return null;
+	}
 
 	public boolean containFields(String... fields) {
 		if (type==ChangeTypes.INSERT||type==ChangeTypes.DELETE) {

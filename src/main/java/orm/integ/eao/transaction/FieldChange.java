@@ -32,5 +32,4 @@ public class FieldChange {
 		this.afterValue = afterValue;
 	}
 	
-	
 }

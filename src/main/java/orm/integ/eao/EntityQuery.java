@@ -8,61 +8,53 @@ import orm.integ.dao.sql.Where;
 import orm.integ.eao.model.Entity;
 import orm.integ.utils.StringUtils;
 
-public class Query extends QueryHandler {
+public class EntityQuery extends QueryHandler {
 
 	TabQuery tabQuery;
 	
-	public Query(Class<? extends Entity> clazz) {
+	public EntityQuery(Class<? extends Entity> clazz) {
 		this(Eaos.getEao(clazz));
 	}
 	
 	@SuppressWarnings("rawtypes")
-	Query(EntityAccessObject eao) {
+	EntityQuery(EntityAccessObject eao) {
 		super(eao);
 		tabQuery = new TabQuery(model);
 		setQueryRequest(tabQuery);
 	}
 
-	public Query addWhere(String whereStmt, Object... values) {
+	public EntityQuery addWhere(String whereStmt, Object... values) {
 		tabQuery.addWhereItem(whereStmt, values);
 		return this;
 	}
 	
-	public Query where(String whereStmt, Object... values) {
+	public EntityQuery where(String whereStmt, Object... values) {
 		tabQuery.setWhere(new Where(whereStmt, values));
 		return this;
 	}
 	
-	public Query addWhere(boolean test, String whereStmt, Object... values) {
+	public EntityQuery addWhere(boolean test, String whereStmt, Object... values) {
 		if (test) {
 			addWhere(whereStmt, values);
 		}
 		return this;
 	}
-	public Query addWhereNotNull(String whereStmt, Object value) {
-		if (isNull(value)) {
-			return addWhere(whereStmt, value);
-		}
-		else {
-			return this;
-		}
-	}
 	
-	public Query addEqual(String colName, Object val) {
+	public EntityQuery addEqual(String colName, Object val) {
 		if (isNull(val)) 
 			return this;
 		else 
 			return this.addWhere(colName+"=?", val);
 	}
 	
-	public Query addLike(String colName, String text) {
+	public EntityQuery addLike(String colName, String text) {
 		if (!isNull(text)) {
 			addWhere(colName + " like ?", "%"+text.trim()+"%");
 		}
 		return this;
 	}
 	
-	public Query addLikes(String text, String... cols) {
+	public EntityQuery addLikes(String text, String... cols) {
 		if (isNull(text)) {
 			return this;
 		}
@@ -77,7 +69,7 @@ public class Query extends QueryHandler {
 		return addWhere(where, values);
 	}	
 	
-	public Query addOrEquals(Object value, String... cols) {
+	public EntityQuery addOrEquals(Object value, String... cols) {
 		if (isNull(value)) {
 			return this;
 		}
@@ -91,12 +83,12 @@ public class Query extends QueryHandler {
 		return this.addWhere(where, values);
 	}
 	
-	public Query setWhere(Where where) {
+	public EntityQuery setWhere(Where where) {
 		tabQuery.setWhere(where);
 		return this;
 	}
 	
-	public Query setOrder(String order) {
+	public EntityQuery setOrder(String order) {
 		tabQuery.setOrder(order);
 		return this;
 	}
@@ -113,5 +105,7 @@ public class Query extends QueryHandler {
 		}
 		return false;
 	}
+
+
 	
 }
