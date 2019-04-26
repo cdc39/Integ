@@ -8,17 +8,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import orm.integ.dao.sql.SqlQuery;
-import orm.integ.dao.sql.TabQuery;
 import orm.integ.eao.EntityAccessObject;
-import orm.integ.eao.model.PageData;
-import orm.integ.eao.model.Record;
 import orm.integ.test.entity.SchoolClass;
 import orm.integ.test.entity.SchoolClassService;
 import orm.integ.test.entity.Student;
 import orm.integ.test.entity.StudentService;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IdGenerator;
+import orm.integ.utils.PageData;
+import orm.integ.utils.Record;
 
 
 public class EAOTest {
@@ -36,7 +34,7 @@ public class EAOTest {
 		
 		studentEao = studentService.getEao();
 		
-		classService.getEao().delete("", null, false);
+		DaoUtil.getDao().delete("tb_school_class", null);
 		
 		SchoolClass sc = new SchoolClass();
 		sc.setId(1);
@@ -48,7 +46,7 @@ public class EAOTest {
 	
 	@Before
 	public void before() {
-		studentService.getEao().delete("", null, false);
+		DaoUtil.getDao().delete("tb_student", null);
 	}
 	
 	@Test
@@ -98,6 +96,7 @@ public class EAOTest {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testQuery() {
 
@@ -113,16 +112,19 @@ public class EAOTest {
 		s2.setSchoolClassId(2);
 		studentEao.insert(s2);
 		
-		TabQuery req = new TabQuery();
-		req.addWhereItem("school_class_id=?", 2);
-		List<Student> list = studentEao.query(req);
+		List<Student> list = studentEao.newQuery()
+				.addWhere("school_class_id=?", 2)
+				.list();
 		Assert.assertEquals(1, list.size());
 		
-		SqlQuery sqlReq = new SqlQuery("select * from tb_student where student_id=?", "s1");
-		list = studentEao.query(sqlReq);
+		list = studentEao
+				.newSqlQuery("select * from tb_student where student_id=?", "s1")
+				.list();
+		
 		Assert.assertEquals(1, list.size());
 
-		int count = studentEao.queryCount("school_class_id=?", 2);
+		int count = studentEao.newQuery()
+				.addWhere("school_class_id=?", 2).count();
 		Assert.assertEquals(1, count);
 
 	}
@@ -135,10 +137,12 @@ public class EAOTest {
 			s1.setSchoolClassId(3);
 			studentEao.insert(s1);
 		}
-		TabQuery tq = new TabQuery();
-		tq.addWhereItem("school_class_id=?", 3);
-		tq.setPageInfo(21, 10);
-		PageData page = studentEao.pageQuery(tq);
+		
+		PageData page = studentEao.newQuery()
+				.addWhere("school_class_id=?", 3)
+				.setPageInfo(21, 10)
+				.page();
+		
 		Assert.assertEquals(100, page.getTotalCount());
 		Assert.assertEquals(10, page.getList().size());
 	}

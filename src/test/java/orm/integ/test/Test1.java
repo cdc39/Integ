@@ -11,10 +11,10 @@ import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.eao.EntityAccessObject;
 import orm.integ.eao.cache.QueryManager;
-import orm.integ.eao.model.Record;
 import orm.integ.test.entity.Student;
 import orm.integ.test.entity.StudentService;
 import orm.integ.utils.Convertor;
+import orm.integ.utils.Record;
 
 public class Test1 {
 
@@ -50,7 +50,9 @@ public class Test1 {
 		for (int i=0; i<10000; i++) {
 			TabQuery tq = new TabQuery();
 			tq.setPageInfo(rand.nextInt(100)*20+1, 10);
-			service.getEao().pageQuery(tq);
+			service.getEao().newQuery()
+				.setPageInfo(rand.nextInt(100)*20+1, 10)
+				.list();
 		}
 		tm.finish();
 		System.out.println("queryByIdsCount="+EntityAccessObject.queryByIdsCount);

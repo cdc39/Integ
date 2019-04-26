@@ -22,7 +22,8 @@ public class DataMaker {
 		
 		EntityAccessObject<Student> eao = new StudentService().getEao();
 		
-		eao.delete("", null, false);
+		String sql = "delete from tb_student";
+		eao.getDAO().executeSql(sql);
 		
 		TimeMonitor tm = new TimeMonitor("createStudents");
 		Student stu;
@@ -44,7 +45,8 @@ public class DataMaker {
 		
 		EntityAccessObject<SchoolClass> eao = new SchoolClassService().getEao();
 
-		eao.delete("", null, false);
+		String sql = "delete from tb_school_class";
+		eao.getDAO().executeSql(sql);
 		
 		SchoolClass sc;
 		double classNumPerGrade = count/6.0;
