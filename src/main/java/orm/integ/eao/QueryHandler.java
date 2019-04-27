@@ -8,6 +8,8 @@ import orm.integ.dao.sql.PageRequest;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.eao.model.Entity;
 import orm.integ.eao.model.EntityModel;
+import orm.integ.eao.model.FieldInfo;
+import orm.integ.utils.Convertor;
 import orm.integ.utils.PageData;
 import orm.integ.utils.Record;
 
@@ -81,6 +83,25 @@ public abstract class QueryHandler {
 			ids.add(en.getId());
 		}
 		return ids;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<String> stringList(String fieldName) {
+		List<Entity> list = eao.query(query);
+		List<String> valueList = new ArrayList<>();
+		FieldInfo field = eao.getEntityModel().getField(fieldName);
+		if (field!=null) {
+			Object val;
+			String strVal;
+			for (Entity en: list) {
+				val = field.getValue(en);
+				if (val!=null) {
+					strVal = Convertor.toString(val);
+					valueList.add(strVal);
+				}
+			}
+		}
+		return valueList;
 	}
 	
 	protected void fillExtendValues(List<Record> recs) {

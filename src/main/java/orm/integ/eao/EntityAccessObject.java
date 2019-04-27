@@ -200,6 +200,9 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 			id = this.createNewIdNoRepeat();
 			entity.setId(id);
 		}
+		if (FromOrmHelper.isFromOrm(entity)) {
+			throw new IntegError("record exists! can not insert again.");
+		}
 		entity.setCreateTime(new Date());
 		DataChange change = ChangeFactory.newInsert(entity);
 		adapter.beforeChange(change);

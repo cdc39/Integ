@@ -106,6 +106,5 @@ public class EntityQuery extends QueryHandler {
 		return false;
 	}
 
-
 	
 }

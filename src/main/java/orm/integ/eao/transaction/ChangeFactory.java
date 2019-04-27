@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import orm.integ.eao.model.Entity;
-import orm.integ.utils.ClassAnalyzer;
+import orm.integ.utils.ClassModel;
 import orm.integ.utils.ObjectHandler;
 
 public class ChangeFactory {
@@ -27,7 +27,7 @@ public class ChangeFactory {
 		if (before==null || after==null || before.getClass()!=after.getClass()) {
 			return changes;
 		}
-		ClassAnalyzer ca = ClassAnalyzer.get(before);
+		ClassModel ca = ClassModel.get(before);
 		String[] fields = ca.getNormalFields();
 		
 		Object v1, v2;

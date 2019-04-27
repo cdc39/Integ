@@ -1,39 +1,31 @@
 package orm.integ.eao.model;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import orm.integ.dao.ColumnInfo;
-import orm.integ.utils.Convertor;
-import orm.integ.utils.MyLogger;
+import orm.integ.utils.ClassField;
 
-public class FieldInfo {
+public class FieldInfo extends ClassField {
 	
 	public FieldInfo(Class<?> ownerClass, String name) {
+		super(null);
 		this.name = name;
 		this.ownerClass = ownerClass;
 	}
 	
-	final Class<?> ownerClass;
+	public FieldInfo(Class<?> ownerClass, ClassField field) {
+		super(field.getField());
+		this.ownerClass = ownerClass;
+		this.setter = field.getSetter();
+		this.getter = field.getGetter();
+	}
 	
-	final String name;
+	final Class<?> ownerClass;
 	
 	ColumnInfo column;
 	
-	Field field;
-	
-	Method setter ;
-	
-	Method getter ;
-
 	Class<? extends Entity> masterClass; 
 	
 	FieldMapping mapping;
 	
-	public String getName() {
-		return name;
-	}
-
 	public String getColumnName() {
 		return column==null?null:column.getName();
 	}
@@ -46,42 +38,6 @@ public class FieldInfo {
 		return column!=null;
 	}
 	
-	public Field getField() {
-		return field;
-	}
-
-	public Method getSetter() {
-		return setter;
-	}
-	
-	public Method getGetter() {
-		return getter;
-	}
-
-	public Object getValue(RecordObject entity) {
-		if (entity!=null && getter!=null) {
-			try {
-				return getter.invoke(entity);
-			}
-			catch(Exception e) {
-				throw new Error(e);
-			}
-		}
-		return null;
-	}
-	
-	public void setValue(RecordObject obj, Object value) {
-		if (setter==null) {
-			return;
-		}
-		Object val = Convertor.translate(value, field.getType());
-		try {
-			setter.invoke(obj, val);
-		}catch(Exception e) {
-			MyLogger.printError(e, "field:"+name+", value="+value.getClass().getName()+":"+value);
-		}
-	}
-
 	public boolean isNormal() {
 		return getter!=null;
 	}

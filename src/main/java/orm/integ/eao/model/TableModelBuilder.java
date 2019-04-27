@@ -12,7 +12,8 @@ import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.annotation.Column;
 import orm.integ.dao.annotation.ForeignKey;
 import orm.integ.dao.annotation.Table;
-import orm.integ.utils.ClassAnalyzer;
+import orm.integ.utils.ClassField;
+import orm.integ.utils.ClassModel;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.StringUtils;
 
@@ -39,8 +40,8 @@ public abstract class TableModelBuilder  {
 			throw new IntegError(objectClass.getSimpleName()+"未设置Table注解！");
 		}
 		
-		ClassAnalyzer ca = ClassAnalyzer.get(objectClass);
-		normalFields = ca.getNormalFields();
+		ClassModel classModel = ClassModel.get(objectClass);
+		normalFields = classModel.getNormalFields();
 		
 		tableName = table.name();
 		tableSchema = table.schema().trim();
@@ -56,17 +57,16 @@ public abstract class TableModelBuilder  {
 		this.tableColumns = dao.getTableColumns(fullTableName);  
 		
 		FieldInfo field;
+		ClassField cf;
 		Field f;
 		String colName;
 		ForeignKey fk;
 		Column col;
 		for (String fieldName:normalFields) {
+			cf = classModel.getClassField(fieldName);
+			f = cf.getField();
 			
-			field = new FieldInfo(objectClass, fieldName);
-			f = ca.getField(fieldName);
-			field.field = f;
-			field.setter = ca.getSetterMethod(f);
-			field.getter = ca.getGetterMethod(fieldName);
+			field = new FieldInfo(objectClass, cf);
 			
 			col = f.getAnnotation(Column.class);
 			if (col!=null) {

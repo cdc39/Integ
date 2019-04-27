@@ -1,7 +1,5 @@
 package orm.integ.utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,38 +61,26 @@ public class ObjectHandler {
 	}
 	
 	private Object object;
-	private ClassAnalyzer ca;
+	private ClassModel cm;
 	
 	public ObjectHandler(Object object) {
-		this.ca = ClassAnalyzer.get(object);
+		this.cm = ClassModel.get(object);
 		this.object = object;
 	}
 	
 	public Object getValue(String fieldName) {
-		Field field = ca.getField(fieldName);
+		ClassField field = cm.getClassField(fieldName);
 		if (field==null) {
 			return null;
 		}
-		try {
-			Method getter = ca.getGetterMethod(fieldName);
-			if (getter!=null) {
-				return getter.invoke(object);
-			}
-			if (field.isAccessible()) {
-				return field.get(object);
-			}
-		}
-		catch(Exception e) {
-			MyLogger.printError(e);
-		}
-		return null;
+		return field.getValue(object);
 	}
 	
 	public void setValue(String fieldName, Object value)  
 	{
-		Field field = ca.getField(fieldName);
+		ClassField field = cm.getClassField(fieldName);
 		if (field!=null) {
-			this.setValue(field, value);
+			field.setValue(object, value);
 		}
 	}
 	
@@ -109,53 +95,8 @@ public class ObjectHandler {
 		}
 	}
 	
-	public Object getValue(Field field)  
-	{
-		Method getter = ca.getGetterMethod(field.getName());
-		Object value = null;
-		try {
-			if(getter!=null)
-			{
-				value = getter.invoke(object);
-			}
-			else if (field.isAccessible())
-			{
-				value = field.get(object);
-			}
-		}
-		catch(Exception e) {
-			MyLogger.printError(e);
-			MyLogger.print("field="+field);
-		}
-		return value;
-	}
-	
-	public void setValue(Field field, Object value) 
-	{
-		Method setter = ca.getSetterMethod(field);
-		try
-		{
-			value = Convertor.translate(value, field.getType());
-			if(setter!=null)
-			{
-				setter.invoke(object, new Object[]{value});
-			}
-			else if (field.isAccessible())
-			{
-				field.set(object, value);
-			}
-		}
-		catch(Exception e) {
-			MyLogger.printError(e);
-			String msg = "set field value failed, field:"+field.getName()+", value="+value
-					+", value class = "+value.getClass().getName()
-					+", setter="+setter+", field.type="+field.getType().getName();
-			MyLogger.print(msg);
-		}
-	}
-	
 	public Map<String, Object> getValues(boolean includeNull) {
-		return getValues(ca.getNormalFields(), includeNull);
+		return getValues(cm.getNormalFields(), includeNull);
 	}
 	
 	public Map<String, Object> getValues(String[] fields, boolean includeNull) {
@@ -171,7 +112,6 @@ public class ObjectHandler {
 	}
 	
 
-	
 	public Object getObject() {
 		return this.object;
 	}

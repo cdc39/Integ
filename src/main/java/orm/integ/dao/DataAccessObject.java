@@ -32,6 +32,7 @@ import orm.integ.dao.sql.Where;
 import orm.integ.utils.Convertor;
 import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
+import orm.integ.utils.Record;
 import orm.integ.utils.StringUtils;
 
 @SuppressWarnings("rawtypes")
@@ -240,21 +241,42 @@ public class DataAccessObject {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T queryForObject(String sql, Object[] args, Class<T> returnClass) {
+	public <T> T queryForObject(String sql, Object[] args, final Class<T> returnClass) {
 		this.printSql(sql, args);
+		this.query(sql, args, new RowMapper(){
+			@Override
+			public Object mapRow(ResultSet rset, int row) throws SQLException {
+				return ResultSetUtil.toObject(rset, returnClass);
+			}
+		});
+		
 		T obj = (T) jdbcTemplate.queryForObject(sql, args, returnClass);
 		this.printGetResult(obj==null?0:1);
 		return obj;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<ListOrderedMap> queryForList(String sql, Object... values) {
-		this.printSql(sql, values);
-		List<ListOrderedMap> list = jdbcTemplate.queryForList(sql, values);
-		this.printGetResult(list.size());
+	public List<Record> queryForList(String sql, Object... values) {
+		
+		List<Record> list = this.query(sql, values, new RowMapper(){
+			@Override
+			public Object mapRow(ResultSet rset, int row) throws SQLException {
+				return ResultSetUtil.toRecord(rset);
+			}
+		});
 		return list;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> List<T> queryForList(String sql, Object[] values, final Class<T> returnClass) {
+		List<T> list = this.query(sql, values, new RowMapper(){
+			@Override
+			public Object mapRow(ResultSet rset, int row) throws SQLException {
+				return ResultSetUtil.toObject(rset, returnClass);
+			}
+		});
+		return list;
+	}
 
 	public void insert(String tableName, Map<String, ?> cols) {
 		String[] colNames = cols.keySet().toArray(new String[0]);

@@ -46,8 +46,9 @@ public class Where {
 		resetValues();
 	}
 	
-	public void addItem(String whereStmt, Object...values) {
+	public Where addItem(String whereStmt, Object...values) {
 		addItem(new StatementAndValue(whereStmt, values));
+		return this;
 	}
 	
 	public String itemsToStatement() {

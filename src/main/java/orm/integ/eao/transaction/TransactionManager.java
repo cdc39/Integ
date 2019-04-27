@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import orm.integ.utils.ClassAnalyzer;
+import orm.integ.utils.ClassModel;
 import orm.integ.utils.IntegError;
 
 public class TransactionManager {
@@ -32,7 +32,7 @@ public class TransactionManager {
 	}
 
 	public static void executeTransaction(Object service, String methodName, Object...values) {
-		Method method = ClassAnalyzer.get(service).getMethod(methodName);
+		Method method = ClassModel.get(service).getMethod(methodName);
 		Transaction tran = new EntityTransaction();
 		putTran(tran);
 		try {
