@@ -2,6 +2,8 @@
 
 ## Integ ORM简介
 
+[Integ Java DOC](http://www.bigtre.com/integorm/doc/)
+
 每一个涉及数据库的Java应用系统都需要解决从关系数据库数据到Java对象的映射问题，又称为Object Relation Mapping问题，可简写为O/R Mapping或ORM。解决ORM问题的框架又被称为持久层框架。一个优良的持久层框架可以大大提高Java系统的开发效率和质量。
 
 Integ 是极其简单又功能完整的Java持久层框架，它的主要功能特点有：
@@ -164,4 +166,4 @@ Integ较MyBatis更轻量级
 
 如果你对Hibernate复杂的注解搞得头晕脑胀，如果你对MyBatic动态条件查询的实现方式（在配置文件中而不是在java代码中）感到怪异，如果你厌烦了隔绝了底层代码，让逻辑陡然复杂起来的动态代理，那么来试试 Integ 吧，你会发现这里有更简洁、更优雅的解决方案。
 
-欢迎大家下载使用。
+欢迎大家下载使用。  [Integ Java DOC](http://www.bigtre.com/integorm/doc/)
