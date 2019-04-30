@@ -16,7 +16,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;

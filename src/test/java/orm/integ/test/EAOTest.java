@@ -24,6 +24,7 @@ public class EAOTest {
 	static StudentService studentService;
 	static SchoolClassService classService;
 	static EntityAccessObject<Student> studentEao;
+	static EntityAccessObject<SchoolClass> classEao;
 	
 	@BeforeClass
 	public static void beforeAll() {
@@ -40,7 +41,8 @@ public class EAOTest {
 		sc.setId(1);
 		sc.setName("1班");
 		sc.setGrade(1);
-		classService.getEao().insert(sc);
+		classEao = classService.getEao();
+		classEao.insert(sc);
 		
 	}
 	

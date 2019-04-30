@@ -530,8 +530,11 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	}
 	
 	public void cleanCache() {
-		this.queryManager.clear();
-		this.cache.clear();
+		if (cache.size()>0 || queryManager.size()>0) {
+			System.out.println("clean "+em.getEntityClass().getSimpleName()+"'s cache");
+			this.queryManager.clear();
+			this.cache.clear();
+		}
 	}
 	
 }

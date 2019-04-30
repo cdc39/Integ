@@ -21,7 +21,7 @@ public class ResultSetUtil {
 			ObjectHandler obh = new ObjectHandler(obj);
 			Object value;
 			for (int i=1; i<=cnt; i++) {
-				colName = md.getColumnName(i);
+				colName = md.getColumnLabel(i);
 				fieldName = StringUtils.underline2hump(colName);
 				value = readValue(rset, i);
 				obh.setValue(fieldName, value);
@@ -59,6 +59,9 @@ public class ResultSetUtil {
 		int type = rset.getMetaData().getColumnType(col);
 		if (type==Types.BIT || type==Types.TINYINT || type==Types.BOOLEAN) {
 			value = rset.getInt(col);
+		}
+		else if (type==Types.VARCHAR) {
+			value = rset.getString(col);
 		}
 		else {
 			value = rset.getObject(col);

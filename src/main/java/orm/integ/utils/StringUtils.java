@@ -99,6 +99,9 @@ public class StringUtils {
 		if (s==null) {
 			return null;
 		}
+		if (s.indexOf("_")<0) {
+			return s;
+		}
 		s = s.toLowerCase();
 		String[] parts = s.split("_");
 		StringBuffer sb = new StringBuffer();

@@ -124,4 +124,8 @@ public class QueryManager<T extends Entity> implements DataChangeListener {
 		this.countQueryCaches.clear();
 	}
 	
+	public int size() {
+		return idQueryCaches.size()+countQueryCaches.size();
+	}
+	
 }

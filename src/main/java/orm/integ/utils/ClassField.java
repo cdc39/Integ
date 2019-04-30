@@ -7,7 +7,9 @@ public class ClassField {
 	
 	public ClassField(Field field) {
 		this.field = field;
-		this.name = field.getName();
+		if (field!=null) {
+			this.name = field.getName();
+		}
 	}
 	
 	protected String name;

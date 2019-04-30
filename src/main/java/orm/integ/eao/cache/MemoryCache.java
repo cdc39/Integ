@@ -51,4 +51,7 @@ public class MemoryCache<T extends Entity> extends EntityCache<T> {
 		}
 	}
 
+	public int size() {
+		return data.size();
+	}
 }

@@ -75,7 +75,11 @@ public class ClassModel {
 				return isNormalDataType(field.getType());
 			}
 		});
-		allFields = fieldList.toArray(new String[0]);
+		List<String> fieldNames = new ArrayList<>();
+		for (Field f: fieldList) {
+			fieldNames.add(f.getName());
+		}
+		allFields = fieldNames.toArray(new String[0]);
 		
 		ClassField cf;
 		String fieldName;
