@@ -326,7 +326,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		DataChange change = ChangeFactory.newUpdate(old, entity);
 		adapter.beforeChange(change);
 
-		Map<String, Object> updateFields = super.calcUpdataFields(old, entity, em);
+		Map<String, Object> updateFields = super.calcUpdateFields(old, entity, em);
 		if (updateFields.size()==0) {
 			return ;
 		}
@@ -410,7 +410,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return toRecord(entity, em.getListFields());
 	}
 	
-	Map<Class<? extends Entity>, Set<Object>> getForeignIds(List<T> list) {
+	Map<Class<? extends Entity>, Set<Object>> getForeignIds(Collection<T> list) {
 		Map<Class<? extends Entity>, Set<Object>> foreignIds = new HashMap<>();
 		Set<Object> ids, idsAll = new HashSet<>();
 		for (FieldInfo fi: em.getFields()) {
@@ -426,7 +426,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	void batchLoadRelEntities(List<T> list, String[] fields) {
+	void batchLoadRelEntities(Collection<T> list, String[] fields) {
 		EntityAccessObject relEao ;
 		Set<Object> ids;
 		Map<Class<? extends Entity>, Set<Object>> foreignIds = getForeignIds(list);
@@ -439,11 +439,11 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		}
 	}
 	
-	public List<Record> toRecords(List<T> list) {
+	public List<Record> toRecords(Collection<T> list) {
 		return toRecords(list, em.getListFields());
 	}
 	
-	public List<Record> toRecords(List<T> list, String[] fields) {
+	public List<Record> toRecords(Collection<T> list, String[] fields) {
 		
 		List<Record> records = new ArrayList<>();
 		if (list==null || fields==null || fields.length==0) {
@@ -460,7 +460,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		return records;
 	}
 	
-	Set<Object> getValueSet(List<T> list, String fieldName) {
+	Set<Object> getValueSet(Collection<T> list, String fieldName) {
 		Set<Object> values = new LinkedHashSet<>();
 		Object value;
 		for (T entity: list) {

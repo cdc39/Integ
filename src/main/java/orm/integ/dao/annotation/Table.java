@@ -13,10 +13,14 @@ public @interface Table {
 	
 	String schema() default "";
 	
-	int keyLength() default 10;
-
 	String keyColumn() default "";
 	
 	String createTimeColumn() default "";
+	
+	int keyType() default KeyTypes.RANDOM; 
+	
+	String keyPrefix() default "";
+	
+	int keyLength() default 10;
 	
 }

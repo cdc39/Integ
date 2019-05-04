@@ -77,7 +77,7 @@ public class TableHandler {
 		return object;
 	}
 
-	protected Map<String, Object> calcUpdataFields(RecordObject old, RecordObject now, TableModel model) {
+	protected Map<String, Object> calcUpdateFields(RecordObject old, RecordObject now, TableModel model) {
 		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(old, now);
 		List<String> fields = new ArrayList<>();
 		String fieldName, colName;

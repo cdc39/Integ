@@ -48,9 +48,9 @@ public class Eaos {
 		return null;
 	}
 	
-	private static EntityAccessObject getEao(List<? extends Entity> list) {
+	private static EntityAccessObject getEao(Collection<? extends Entity> list) {
 		if (list.size()>0) {
-			Class c = list.get(0).getClass();
+			Class c = list.iterator().next().getClass();
 			return getEao(c);
 		}
 		return null;
@@ -80,11 +80,11 @@ public class Eaos {
 		return null;
 	}
 	
-	public static List<Record> toRecords(List<? extends Entity> list) {
+	public static List<Record> toRecords(Collection<? extends Entity> list) {
 		return toRecords(list, true);
 	}
 	
-	public static List<Record> toRecords(List<? extends Entity> list, boolean sameClass) {
+	public static List<Record> toRecords(Collection<? extends Entity> list, boolean sameClass) {
 		EntityAccessObject eao;
 		List<Record> rtList = new ArrayList<>();
 		if (sameClass) {

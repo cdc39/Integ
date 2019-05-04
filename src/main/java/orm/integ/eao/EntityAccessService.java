@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import orm.integ.dao.DataAccessObject;
+import orm.integ.dao.annotation.KeyTypes;
+import orm.integ.dao.annotation.Table;
 import orm.integ.eao.model.Entity;
 import orm.integ.eao.model.EntityModel;
 import orm.integ.eao.transaction.DataChangeListener;
@@ -36,8 +38,18 @@ public abstract class EntityAccessService<T extends Entity> extends EaoAdapter<T
 	}
 	
 	public Object createNewId() {
-		int keyLength = em.getTable().keyLength();
-		return IdGenerator.createRandomStr(keyLength, false);
+		Table tab = em.getTable();
+		int idType = tab.keyType();
+		if (idType==KeyTypes.INT_INCREASE) {
+			return dao.getNextIntId(em.getFullTableName(), em.getKeyColumn());
+		}
+		else {
+			String id = IdGenerator.createRandomStr(tab.keyLength(), false);
+			if (!tab.keyPrefix().equals("")) {
+				id = tab.keyPrefix()+id;
+			}
+			return id;	
+		}
 	}
 
 	public void executeTransaction(String methodName, Object...values) {
