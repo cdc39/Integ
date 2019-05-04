@@ -25,6 +25,12 @@ public class FieldInfo extends ClassField {
 	Class<? extends Entity> masterClass; 
 	
 	FieldMapping mapping;
+
+	boolean isKey;
+	
+	public boolean isKey() {
+		return isKey;
+	}
 	
 	public String getColumnName() {
 		return column==null?null:column.getName();

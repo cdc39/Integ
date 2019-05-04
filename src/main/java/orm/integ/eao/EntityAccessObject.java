@@ -18,6 +18,7 @@ import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.dao.sql.StatementAndValue;
 import orm.integ.dao.sql.TabQuery;
+import orm.integ.dao.sql.Where;
 import orm.integ.eao.cache.MemoryCache;
 import orm.integ.eao.cache.NoExistsCache;
 import orm.integ.eao.cache.QueryManager;
@@ -38,7 +39,7 @@ import orm.integ.utils.MyLogger;
 import orm.integ.utils.PageData;
 import orm.integ.utils.Record;
 
-public class EntityAccessObject<T extends Entity> extends TableHandler {
+public class EntityAccessObject<T extends Entity> extends TableHandler<T> {
 
 	public static int queryByIdsCount = 0;
 	
@@ -50,11 +51,10 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 	private final NoExistsCache notExistsCache = new NoExistsCache();
 	private final QueryManager<T> queryManager ;
 	private final List<DataChangeListener> dataChangeListeners = new ArrayList<>();
+	private final DataAccessObject dao;
 	
 	@SuppressWarnings("unchecked")
 	public EntityAccessObject(EaoAdapter<T> adapter) {
-		
-		super(adapter.getDao());
 		
 		this.adapter = adapter;
 		this.dao = adapter.getDao();
@@ -63,10 +63,11 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
         Type[] ts = ((ParameterizedType) t).getActualTypeArguments();
 		entityClass = (Class<T>)ts[0];
 		
-		
 		EntityModelBuilder emBuilder = new EntityModelBuilder(entityClass, dao);
 		adapter.setEntityConfig(emBuilder);
 		em = emBuilder.buildModel();
+		
+		super.init(dao, em);
 		
 		queryManager = new QueryManager<T>(dao);
 		
@@ -76,7 +77,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		
 		Eaos.addEao(this);
 		
-		rowMapper = new TableRowMapper(em);
+		rowMapper = new TableRowMapper();
 		
 	}
 	
@@ -206,7 +207,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		entity.setCreateTime(new Date());
 		DataChange change = ChangeFactory.newInsert(entity);
 		adapter.beforeChange(change);
-		insert(entity, em);
+		super.insert(entity);
 		afterChange(change);
 		putToCache(entity);
 		adapter.afterChange(change);
@@ -326,12 +327,12 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 		DataChange change = ChangeFactory.newUpdate(old, entity);
 		adapter.beforeChange(change);
 
-		Map<String, Object> updateFields = super.calcUpdateFields(old, entity, em);
+		Map<String, Object> updateFields = super.calcUpdateFields(old, entity);
 		if (updateFields.size()==0) {
 			return ;
 		}
 		
-		StatementAndValue where = new StatementAndValue(em.getKeyColumn()+"=?", entity.getId());
+		Where where = new Where(em.getKeyColumn()+"=?", entity.getId());
 		
 		dao.update(em.getTableName(), updateFields, where);
 		afterChange(change);
@@ -536,5 +537,6 @@ public class EntityAccessObject<T extends Entity> extends TableHandler {
 			this.cache.clear();
 		}
 	}
+
 	
 }

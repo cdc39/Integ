@@ -7,7 +7,7 @@ import orm.integ.utils.StringUtils;
 
 public class Where {
 
-	private List<StatementAndValue> whereItems = new ArrayList<>();
+	private List<StatementAndValue> items = new ArrayList<>();
 	
 	private Object[] values;
 	
@@ -22,7 +22,7 @@ public class Where {
 	
 	private void resetValues() {
 		List<Object> valueList = new ArrayList<>();
-		for (StatementAndValue stmt: this.whereItems) {
+		for (StatementAndValue stmt: this.items) {
 			for (Object value: stmt.getValues()) {
 				if (value!=null && value instanceof String) {
 					value = value.toString().trim();
@@ -37,12 +37,12 @@ public class Where {
 		return values;
 	}
 	
-	public List<StatementAndValue> getWhereItems() {
-		return whereItems;
+	public List<StatementAndValue> getItems() {
+		return items;
 	}
 	
 	public void addItem(StatementAndValue item) {
-		whereItems.add(item);
+		items.add(item);
 		resetValues();
 	}
 	
@@ -53,14 +53,14 @@ public class Where {
 	
 	public String itemsToStatement() {
 		List<String> stmtList = new ArrayList<>();
-		if (whereItems.size()==1) {
-			return whereItems.get(0).getStatement();
+		if (items.size()==1) {
+			return items.get(0).getStatement();
 		}
-		else if (whereItems.size()==0) {
+		else if (items.size()==0) {
 			return "";
 		}
 		else {
-			for (StatementAndValue stmt: whereItems) {
+			for (StatementAndValue stmt: items) {
 				if (!isNull(stmt.getStatement())) {
 					stmtList.add("("+stmt.getStatement()+")");
 				}
@@ -91,7 +91,7 @@ public class Where {
 	public StatementAndValue toStatementAndValue(String alias) {
 		StatementAndValue newItem;
 		Where where = new Where();
-		for (StatementAndValue item:whereItems) {
+		for (StatementAndValue item:items) {
 			newItem = new StatementAndValue(alias+"."+item.getStatement(), item.getValues());
 			where.addItem(newItem);
 		}
@@ -103,15 +103,15 @@ public class Where {
 	}
 
 	public void copyFrom(Where where) {
-		this.whereItems.clear();
-		this.whereItems.addAll(where.whereItems);
+		this.items.clear();
+		this.items.addAll(where.items);
 		this.resetValues();
 	}
 	
 	@Override
 	public int hashCode() {
 		int code = 0;
-		for (StatementAndValue item:whereItems) {
+		for (StatementAndValue item:items) {
 			code = code*31+item.getStatement().hashCode();
 		}
 		if (this.values!=null) {
@@ -122,6 +122,10 @@ public class Where {
 			}
 		}
 		return code;
+	}
+
+	public boolean isEmpty() {
+		return items.size()==0;
 	}
 	
 }

@@ -241,17 +241,24 @@ public class DataAccessObject {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, Object[] args, final Class<T> returnClass) {
-		this.printSql(sql, args);
-		this.query(sql, args, new RowMapper(){
+		List list = this.query(sql, args, new RowMapper(){
 			@Override
 			public Object mapRow(ResultSet rset, int row) throws SQLException {
-				return ResultSetUtil.toObject(rset, returnClass);
+				if (returnClass.getName().startsWith("java")) {
+					Object value = ResultSetUtil.readValue(rset, 1);
+					return Convertor.translate(value, returnClass);
+				}
+				else {
+					return ResultSetUtil.toObject(rset, returnClass);
+				}
 			}
 		});
-		
-		T obj = (T) jdbcTemplate.queryForObject(sql, args, returnClass);
-		this.printGetResult(obj==null?0:1);
-		return obj;
+		return list.size()>0?(T)list.get(0):null;
+	}
+	
+	public String queryForString(String sql, Object... args) {
+		List<String> list = this.queryIds(sql, args);
+		return list.size()>0?list.get(0):null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -308,8 +315,8 @@ public class DataAccessObject {
 	}
 
 	public int update(String tableName, Map<String,Object> updateValues, 
-			StatementAndValue whereItem) {
-		if (whereItem==null || isNull(whereItem.getStatement())) {
+			Where where) {
+		if (where==null || isNull(where.itemsToStatement())) {
 			throw new IntegError("where item can't be null in update!");
 		}
 		String[] updateCols = updateValues.keySet().toArray(new String[0]);
@@ -319,9 +326,9 @@ public class DataAccessObject {
 			columns.add(col+"=?");
 		}
 		String colsStr = StringUtils.link(columns, ", ");
-		String sql = "update "+tableName+" set "+colsStr+" where "+whereItem.getStatement();
+		String sql = "update "+tableName+" set "+colsStr+where.toString();
 		
-		Object[] whereValues = whereItem.getValues();
+		Object[] whereValues = where.getValues();
 		Object[] values2 = new Object[updateCols.length+whereValues.length];
 		String colName;
 		for (int i=0; i<updateCols.length; i++) {

@@ -11,6 +11,7 @@ import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.annotation.Column;
 import orm.integ.dao.annotation.ForeignKey;
+import orm.integ.dao.annotation.Key;
 import orm.integ.dao.annotation.Table;
 import orm.integ.utils.ClassField;
 import orm.integ.utils.ClassModel;
@@ -18,7 +19,7 @@ import orm.integ.utils.IntegError;
 import orm.integ.utils.StringUtils;
 
 @SuppressWarnings("rawtypes")
-public abstract class TableModelBuilder  {
+public class TableModelBuilder  {
 
 	protected Table table;
 
@@ -80,6 +81,9 @@ public abstract class TableModelBuilder  {
 			if (fk!=null) {
 				field.masterClass = fk.masterClass();
 			}
+			if (f.getAnnotation(Key.class)!=null) {
+				field.isKey = true;
+			}
 			fieldInfos.put(fieldName, field);
 		}
 
@@ -108,7 +112,13 @@ public abstract class TableModelBuilder  {
 		return null;
 	}
 	
-	protected void buildModel(TableModel model) {
+	protected TableModel createTableModel() {
+		return new TableModel();
+	}
+	
+	public TableModel buildModel() {
+		
+		TableModel model = createTableModel();
 		
 		model.table = table;
 		model.objectClass = objectClass;
@@ -121,11 +131,17 @@ public abstract class TableModelBuilder  {
 		
 		int len = fieldNames.size();
 		FieldInfo[] fields = new FieldInfo[len];
+		List<String> keyColumns = new ArrayList<>();
+		FieldInfo f;
 		for (int i=0; i<len; i++) {
-			fields[i] = fieldInfos.get(fieldNames.get(i));
+			f = fieldInfos.get(fieldNames.get(i));
+			fields[i] = f;
+			if (f.isKey) {
+				keyColumns.add(f.getColumnName());
+			}
 		}
-		
 		model.setFields(fields);
+		model.keyColumns = keyColumns.toArray(new String[]{});
 		
 		String colName;
 		List<String> noFieldCols = new ArrayList<>();
@@ -135,6 +151,9 @@ public abstract class TableModelBuilder  {
 				noFieldCols.add(colName);
 			}
 		}
+		
+		return model;
+		
 	}
 	
 	protected List<String> getAllFieldName() {

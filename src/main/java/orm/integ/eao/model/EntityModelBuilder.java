@@ -9,6 +9,7 @@ import java.util.Set;
 
 import orm.integ.dao.DataAccessObject;
 import orm.integ.utils.IntegError;
+import orm.integ.utils.MyLogger;
 
 public class EntityModelBuilder extends TableModelBuilder implements EntityConfig {
 
@@ -38,10 +39,14 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		return tableKeyName;
 	}
 	
+	@Override
+	protected EntityModel createTableModel() {
+		return new EntityModel();
+	}
+	
 	public EntityModel buildModel() {
 		
-		EntityModel model = new EntityModel();
-		super.buildModel(model);
+		EntityModel model = (EntityModel) super.buildModel();
 		
 		model.tableKeyName = tableKeyName;
 		model.keyColumn = getField("id").getColumnName();
@@ -128,7 +133,8 @@ public class EntityModelBuilder extends TableModelBuilder implements EntityConfi
 		String fkFieldName = className+"."+foreignKeyField;
 		
 		if (fkField==null) {
-			throw new IntegError("外键属性 "+fkFieldName+"不存在！");
+			MyLogger.print("外键属性 "+fkFieldName+"不存在！");
+			return;
 		}
 		if (!fkField.isForeignKey()) {
 			throw new IntegError(fkFieldName+"未设为外键！");

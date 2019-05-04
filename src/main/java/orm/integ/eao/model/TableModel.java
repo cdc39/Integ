@@ -10,7 +10,7 @@ import orm.integ.dao.annotation.Table;
 import orm.integ.dao.sql.TableInfo;
 import orm.integ.utils.StringUtils;
 
-public abstract class TableModel implements TableInfo {
+public class TableModel implements TableInfo {
 
 	protected Class<?> objectClass;
 	Table table;
@@ -18,6 +18,7 @@ public abstract class TableModel implements TableInfo {
 	String tableSchema;
 	String fullTableName;
 	ColumnInfo[] tableColumns ;
+	String[] keyColumns;
 
 	FieldInfo[] fields;
 	Map<String, FieldInfo> fieldMap = new HashMap<>();
@@ -59,7 +60,9 @@ public abstract class TableModel implements TableInfo {
 	}
 	
 	@Override
-	public abstract String[] getKeyColumns() ;
+	public String[] getKeyColumns() {
+		return keyColumns;
+	}
 	
 	public ColumnInfo[] getColumns() {
 		return tableColumns;

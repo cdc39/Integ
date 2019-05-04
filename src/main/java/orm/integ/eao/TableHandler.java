@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import orm.integ.dao.DBUtil;
 import orm.integ.dao.DataAccessObject;
+import orm.integ.dao.sql.Where;
 import orm.integ.eao.model.FieldInfo;
 import orm.integ.eao.model.FromOrmHelper;
 import orm.integ.eao.model.RecordObject;
@@ -19,29 +21,26 @@ import orm.integ.eao.model.TableModel;
 import orm.integ.eao.transaction.ChangeFactory;
 import orm.integ.eao.transaction.FieldChange;
 import orm.integ.utils.Convertor;
+import orm.integ.utils.IntegError;
 import orm.integ.utils.MyLogger;
 
-public class TableHandler {
+public abstract class TableHandler<T extends RecordObject> {
 
-	DataAccessObject dao;
+	protected DataAccessObject dao;
+	protected TableModel model;
 	
-	public TableHandler(DataAccessObject dao) {
+	protected void init(DataAccessObject dao, TableModel model) {
 		this.dao = dao;
+		this.model = model;
 	}
 	
 	class TableRowMapper implements RowMapper {
 
-		TableModel model;
-		
-		TableRowMapper(TableModel model) {
-			this.model = model;
-		}
-		
 		@Override
 		public Object mapRow(ResultSet rset, int row) throws SQLException {
-			RecordObject obj = null;
+			T obj = null;
 			try {
-				obj = readRowValues(model, rset);
+				obj = readRowValues(rset);
 				FromOrmHelper.setFromOrm(obj);
 			}
 			catch(Exception e) {
@@ -52,8 +51,9 @@ public class TableHandler {
 		
 	}
 	
-	protected RecordObject readRowValues(TableModel model, ResultSet rset) throws Exception  {
-		RecordObject object = (RecordObject) model.getObjectClass().newInstance();
+	@SuppressWarnings("unchecked")
+	protected T readRowValues(ResultSet rset) throws Exception  {
+		T object = (T) model.getObjectClass().newInstance();
 		FieldInfo field;
 		Object value;
 		ResultSetMetaData metaData;
@@ -77,7 +77,7 @@ public class TableHandler {
 		return object;
 	}
 
-	protected Map<String, Object> calcUpdateFields(RecordObject old, RecordObject now, TableModel model) {
+	protected Map<String, Object> calcUpdateFields(RecordObject old, RecordObject now) {
 		List<FieldChange> fieldChanges = ChangeFactory.findDifferents(old, now);
 		List<String> fields = new ArrayList<>();
 		String fieldName, colName;
@@ -104,11 +104,14 @@ public class TableHandler {
 		return updateFields;
 	}
 	
-	protected void insert(RecordObject obj, TableModel table) {
-		FieldInfo[] fields = table.getFields();
+	public void insert(RecordObject obj) {
+		FieldInfo[] fields = model.getFields();
 		Map<String, Object> colValues = new HashMap<>();
 		Object value;
 		Class<?> dbDataType;
+		if (obj.getCreateTime()==null) {
+			obj.setCreateTime(new Date());
+		}
 		for (FieldInfo field: fields) {
 			if (field.columnExists()) {
 				value = field.getValue(obj);
@@ -119,8 +122,65 @@ public class TableHandler {
 				}
 			}
 		}
-		dao.insert(table.getTableName(), colValues);	
+		dao.insert(model.getTableName(), colValues);	
 		FromOrmHelper.setFromOrm(obj);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public T queryOld(T obj) {
+		Where keyWhere = getKeyWhere(obj);
+		String sql = "select * from "+model.getFullTableName()+" "+keyWhere.toString();
+		T oldObj = (T) dao.queryForObject(sql, keyWhere.getValues(), model.getObjectClass());
+		return oldObj;
+	}
+	
+	private Where getKeyWhere(T obj) {
+		Where where = new Where();
+		Object value;
+		for (FieldInfo fi: model.getFields()) {
+			if (fi.isKey()) {
+				value = fi.getValue(obj);
+				if (value==null) {
+					throw new IntegError(fi.getName()+"为空");
+				}
+				where.addItem(fi.getColumnName()+"=?", value);
+			}
+		}
+		if (where.isEmpty()) {
+			String className = model.getObjectClass().getSimpleName();
+			throw new IntegError(className+" 未设置主键");
+		}
+		return where;
+	}
+	
+	public void update(T obj, String[] fields) {
+		Where where = this.getKeyWhere(obj);
+
+		Map<String, Object> values = new HashMap<>();
+		FieldInfo fi;
+		Object value;
+		for (String fieldName: fields) {
+			fi = model.getField(fieldName);
+			if (fi!=null && !fi.isKey() && fi.columnExists()) {
+				value = fi.getValue(obj);
+				values.put(fi.getColumnName(), value);
+			}
+		}
+		dao.update(model.getFullTableName(), values, where);
+	}
+	
+	public void update(T obj) {
+		Where where = this.getKeyWhere(obj);
+		Map<String, Object> values = new HashMap<>();
+		Object value;
+		for (FieldInfo fi: model.getFields()) {
+			if (!fi.isKey() && fi.columnExists() 
+					&& !fi.getName().equals("createTime")) {
+				value = fi.getValue(obj);
+				values.put(fi.getColumnName(), value);
+			}
+		}
+		dao.update(model.getFullTableName(), values, where);
 	}
 	
 }
