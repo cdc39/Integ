@@ -15,6 +15,7 @@ import java.util.Set;
 import org.springframework.jdbc.core.RowMapper;
 
 import orm.integ.dao.DataAccessObject;
+import orm.integ.dao.sql.PageRequest;
 import orm.integ.dao.sql.QueryRequest;
 import orm.integ.dao.sql.StatementAndValue;
 import orm.integ.dao.sql.TabQuery;
@@ -100,6 +101,12 @@ public class EntityAccessObject<T extends Entity> extends TableHandler<T> {
 	public EntityQuery newQuery() {
 		return new EntityQuery(this);
 	}
+	
+	public EntityQuery newQuery(PageRequest page, String order ) {
+		return (EntityQuery) new EntityQuery(this)
+				.setOrder(order)
+				.setPageInfo(page);
+	}
 
 	public EntitySqlQuery newSqlQuery(StatementAndValue sql){
 		return new EntitySqlQuery(this, sql);
@@ -183,7 +190,7 @@ public class EntityAccessObject<T extends Entity> extends TableHandler<T> {
 	}
 	
 	public List<T> getAll() {
-		return getAll(10000);
+		return getAll(100000);
 	}
 	
 	T queryFirst(QueryRequest req) {

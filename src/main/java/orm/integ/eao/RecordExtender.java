@@ -12,10 +12,10 @@ public abstract class RecordExtender {
 		String fkId = record.getString(fkField);
 		Entity entity = Eaos.getEntity(clazz, fkId);
 		if (entity!=null) {
-			Record rec2 = Eaos.toListRecord(entity);
+			Record subRec = Eaos.toListRecord(entity);
 			Object value;
-			for (String field:rec2.keySet()) {
-				value = rec2.get(field);
+			for (String field:subRec.keySet()) {
+				value = subRec.get(field);
 				if (override || !record.containsKey(field)) {
 					record.put(field, value);
 				}
@@ -24,7 +24,7 @@ public abstract class RecordExtender {
 	}
 	
 	public static void merge(Record record, String fkField, Class<? extends Entity> clazz) {
-		merge(record, fkField, clazz, true);
+		merge(record, fkField, clazz, false);
 	}
 	
 	public static void addSub(Record record, String fkField, String subField, Class<? extends Entity> clazz) {

@@ -22,5 +22,9 @@ public @interface Table {
 	String keyPrefix() default "";
 	
 	int keyLength() default 10;
+
+	boolean cacheAll() default false;
+	
+	int loadOrder() default 9;
 	
 }

@@ -81,6 +81,10 @@ public class TableModelBuilder  {
 			if (fk!=null) {
 				field.masterClass = fk.masterClass();
 			}
+			else {
+				field.masterClass = FieldConfig.getMasterClass(fieldName);
+			}
+			
 			if (f.getAnnotation(Key.class)!=null) {
 				field.isKey = true;
 			}
