@@ -275,13 +275,7 @@ public class DataAccessObject {
 	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> queryForList(String sql, Object[] values, final Class<T> returnClass) {
-		List<T> list = this.query(sql, values, new RowMapper(){
-			@Override
-			public Object mapRow(ResultSet rset, int row) throws SQLException {
-				return ResultSetUtil.toObject(rset, returnClass);
-			}
-		});
-		return list;
+		return this.query(sql, values, new ClassRowMapper(returnClass));
 	}
 
 	public void insert(String tableName, Map<String, ?> cols) {
@@ -453,6 +447,21 @@ public class DataAccessObject {
 		return list;
 		
 	}
+	
+	class ClassRowMapper implements RowMapper {
+		Class<?> returnClass;
+		public ClassRowMapper(Class<?> returnClass) {
+			this.returnClass = returnClass;
+		}
+		@Override
+		public Object mapRow(ResultSet rset, int row) throws SQLException {
+			return ResultSetUtil.toObject(rset, returnClass);
+		}
+	}
+	
+	public List queryByIds(String tableName, String keyColumn, Object[] ids, Class<?> returnClass) {
+		return queryByIds(tableName, keyColumn, ids, new ClassRowMapper(returnClass));
+	}	
 
 	public int update(TabQuery req, String setStmt) {
 		String whereStmt = req.getWhere().toString();

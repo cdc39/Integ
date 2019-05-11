@@ -7,7 +7,7 @@ public class PageData {
 	private final List<Record> list;
 	
 	private final int totalCount;
-
+	
 	public PageData(List<Record> list, int totalCount) {
 		this.list = list;
 		this.totalCount = totalCount;

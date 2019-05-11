@@ -22,13 +22,13 @@ public class EntityTransaction extends Transaction  {
 			return;
 		}
 		Entity entity = change.getEntity();
-		if (change.getType()==ChangeTypes.INSERT) {
+		if (change.getType()==DataChange.INSERT) {
 			eao.deleteById(entity.getId(), false);
 		}
-		else if (change.getType()==ChangeTypes.DELETE) {
+		else if (change.getType()==DataChange.DELETE) {
 			eao.insert(entity);
 		}
-		else if (change.getType()==ChangeTypes.UPDATE) {
+		else if (change.getType()==DataChange.UPDATE) {
 			eao.update(change.getBefore());
 		}
 	}

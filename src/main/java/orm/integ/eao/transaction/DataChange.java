@@ -6,6 +6,10 @@ import orm.integ.eao.model.Entity;
 
 public class DataChange {
 
+	public static final int INSERT = 1;
+	public static final int DELETE = 2;
+	public static final int UPDATE = 3;
+	
 	public DataChange(int changeType, Entity before, Entity after) {
 		this.type = changeType;
 		this.before = before;
@@ -64,7 +68,7 @@ public class DataChange {
 	}
 
 	public boolean containFields(String... fields) {
-		if (type==ChangeTypes.INSERT||type==ChangeTypes.DELETE) {
+		if (type==INSERT||type==DELETE) {
 			return true;
 		}
 		if (fields==null || fields.length==0) {

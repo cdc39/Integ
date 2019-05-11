@@ -1,7 +1,9 @@
 package orm.integ.eao;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import orm.integ.dao.DataAccessObject;
 import orm.integ.dao.sql.PageRequest;
@@ -85,6 +87,13 @@ public abstract class QueryHandler {
 		return ids;
 	}
 	
+	public Set<String> idSet(String fieldName) {
+		List<String> idList = stringList(fieldName);
+		Set<String> idSet = new LinkedHashSet<>();
+		idSet.addAll(idList);
+		return idSet;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<String> stringList(String fieldName) {
 		List<Entity> list = eao.query(query);
@@ -130,7 +139,7 @@ public abstract class QueryHandler {
 		return recList;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void forEach(EntityHandler handler) {
 		List list = this.list();
 		for (Object obj: list) {

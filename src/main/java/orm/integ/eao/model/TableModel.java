@@ -8,6 +8,7 @@ import java.util.Map;
 import orm.integ.dao.ColumnInfo;
 import orm.integ.dao.annotation.Table;
 import orm.integ.dao.sql.TableInfo;
+import orm.integ.utils.Convertor;
 import orm.integ.utils.StringUtils;
 
 public class TableModel implements TableInfo {
@@ -156,6 +157,22 @@ public class TableModel implements TableInfo {
 		List<String> noFieldColumns = this.getNoFieldColumns();
 		String noFieldCols = StringUtils.link(noFieldColumns, ",");
 		System.out.println("no field columns: "+noFieldCols);
+	}
+	
+	public Object getFieldValue(Object obj, String fieldName) {
+		if (obj==null) {
+			return null;
+		}
+		FieldInfo fi = this.getField(fieldName);
+		if (fi==null) {
+			return null;
+		}
+		return fi.getValue(obj);
+	}
+	
+	public String getStringValue(Object obj, String fieldName) {
+		Object value = getFieldValue(obj, fieldName);
+		return Convertor.toString(value);
 	}
 	
 }

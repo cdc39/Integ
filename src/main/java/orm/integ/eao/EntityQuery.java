@@ -6,6 +6,7 @@ import java.util.List;
 import orm.integ.dao.sql.TabQuery;
 import orm.integ.dao.sql.Where;
 import orm.integ.eao.model.Entity;
+import orm.integ.eao.model.FieldInfo;
 import orm.integ.utils.StringUtils;
 
 public class EntityQuery extends QueryHandler {
@@ -14,6 +15,11 @@ public class EntityQuery extends QueryHandler {
 	
 	public EntityQuery(Class<? extends Entity> clazz) {
 		this(Eaos.getEao(clazz));
+	}
+	
+	public EntityQuery(Class<? extends Entity> clazz, String orderStmt) {
+		this(Eaos.getEao(clazz));
+		this.setOrder(orderStmt);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -41,10 +47,16 @@ public class EntityQuery extends QueryHandler {
 	}
 	
 	public EntityQuery addEqual(String colName, Object val) {
-		if (isNull(val)) 
+		if (isNull(val) || isNull(colName)) {
 			return this;
-		else 
-			return this.addWhere(colName+"=?", val);
+		}
+		if (colName.indexOf("_")<0) {
+			FieldInfo fi = model.getField(colName);
+			if (fi!=null && fi.columnExists()) {
+				colName = fi.getColumnName();
+			}
+		}
+		return this.addWhere(colName+"=?", val);
 	}
 	
 	public EntityQuery addLike(String colName, String text) {

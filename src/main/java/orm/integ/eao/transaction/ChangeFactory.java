@@ -11,15 +11,15 @@ import orm.integ.utils.ObjectHandler;
 public class ChangeFactory {
 
 	public static DataChange newUpdate(Entity before, Entity after) {
-		return new DataChange(ChangeTypes.UPDATE, before, after);
+		return new DataChange(DataChange.UPDATE, before, after);
 	}
 	
 	public static DataChange newInsert(Entity entity) {
-		return new DataChange(ChangeTypes.INSERT, null, entity);
+		return new DataChange(DataChange.INSERT, null, entity);
 	}
 	
 	public static DataChange newDelete(Entity entity) {
-		return new DataChange(ChangeTypes.DELETE, entity, null);
+		return new DataChange(DataChange.DELETE, entity, null);
 	}
 	
 	public static List<FieldChange> findDifferents(Object before, Object after) {

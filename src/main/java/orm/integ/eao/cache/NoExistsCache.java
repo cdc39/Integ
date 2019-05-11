@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import orm.integ.eao.model.Entity;
-import orm.integ.eao.transaction.ChangeTypes;
 import orm.integ.eao.transaction.DataChange;
 import orm.integ.eao.transaction.DataChangeListener;
 
@@ -43,7 +42,7 @@ public class NoExistsCache implements DataChangeListener {
 
 	@Override
 	public void notifyChange(DataChange change) {
-		if (change.getType()==ChangeTypes.INSERT) {
+		if (change.getType()==DataChange.INSERT) {
 			Entity en = change.getEntity();
 			notExistIds.remove(en.getId());
 		}

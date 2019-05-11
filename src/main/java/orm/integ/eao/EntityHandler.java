@@ -2,9 +2,8 @@ package orm.integ.eao;
 
 import orm.integ.eao.model.Entity;
 
-public interface EntityHandler {
+public interface EntityHandler<T extends Entity> {
 
-	@SuppressWarnings("rawtypes")
-	public void handle(Entity entity, EntityAccessObject eao) ;
+	public void handle(T entity, EntityAccessObject<T> eao) ;
 	
 }
