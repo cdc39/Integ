@@ -16,4 +16,14 @@ public class Record extends HashMap<String, Object> {
 		return value==null?false:Convertor.toBool(value);
 	}
 	
+	public void merge(Record rec, boolean override) {
+		Object value;
+		for (String field:rec.keySet()) {
+			value = rec.get(field);
+			if (override || !this.containsKey(field)) {
+				this.put(field, value);
+			}
+		}
+	}
+	
 }

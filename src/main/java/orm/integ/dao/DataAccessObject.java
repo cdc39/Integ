@@ -103,13 +103,10 @@ public class DataAccessObject {
 		}
 	}
 	
-	public void testQuery(String sql, Object...values) {
-		this.jdbcTemplate.queryForRowSet(sql, values);
-	}
-	
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
+	
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -221,6 +218,7 @@ public class DataAccessObject {
 
 	public Map queryForMap(String sql, Object... values) {
 		this.printSql(sql, values);
+		
 		Map map = jdbcTemplate.queryForMap(sql, values);
 		MyLogger.printMap(map, "result map");
 		return map;
